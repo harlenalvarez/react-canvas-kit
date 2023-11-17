@@ -1,0 +1,31 @@
+.main {
+  z-index: 1;
+  position: fixed;
+  display: flex;
+  align-items: stretch;
+}
+
+.main:focus-visible {
+  outline: none;
+}
+
+.popover {
+  position: fixed;
+  z-index: 0;
+}
+
+.canvas {
+  position: fixed;
+  z-index: 0;
+  background-image: radial-gradient(circle at center, #b6b6b6 5%, transparent 0);
+  background-size: 20px 20px;
+  background-position: -1% -1%;
+}
+
+.canvas:focus-visible {
+  outline: none;
+}
+
+.hidden {
+  display: none;
+}

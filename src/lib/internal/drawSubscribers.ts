@@ -1,0 +1,1 @@
+export const drawSubscribers = new Set<() => void>();
