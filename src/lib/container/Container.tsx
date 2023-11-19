@@ -27,7 +27,9 @@ export const CanvasContainerCss = {
   container: 'RCK-Container-Layout'
 }
 
-export const CanvasContainer = ({ fullScreen, offsetTop, children }: CanvasContainerProps) => {
+export const CanvasContainer = ({ offsetTop, children }: CanvasContainerProps) => {
+  // V1 will only support fullscreen
+  const fullScreen = true
   console.log('rendeing container');
   const containerRef = useRef<HTMLDivElement>(null)
   useCanvasInteractions({

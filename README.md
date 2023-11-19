@@ -26,7 +26,7 @@ const Actions = () => {
 function App() {
   return (
     <>
-      <CanvasContainer fullScreen>
+      <CanvasContainer>
         <Actions />
       </CanvasContainer>
     </>

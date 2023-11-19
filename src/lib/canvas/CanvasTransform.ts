@@ -1,4 +1,4 @@
-import { Point, clamp, getCanvasPointFromMatrix } from '@practicaljs/canvas-kit';
+import { Point, clamp, getCanvasPointFromMatrix, getMidPoint } from '@practicaljs/canvas-kit';
 import { PriorityQueue } from '@practicaljs/priority-queue';
 
 let listeners = new Set<() => void>();
@@ -32,8 +32,8 @@ class CanvasTransform {
   readonly max = 4;
 
   private minX = new PriorityQueue<ShapeCoordinate>((a, b) => a.value - b.value);
-  private minY = new PriorityQueue<ShapeCoordinate>((a, b) => b.value - a.value);
-  private maxX = new PriorityQueue<ShapeCoordinate>((a, b) => a.value - b.value);
+  private minY = new PriorityQueue<ShapeCoordinate>((a, b) => a.value - b.value);
+  private maxX = new PriorityQueue<ShapeCoordinate>((a, b) => b.value - a.value);
   private maxY = new PriorityQueue<ShapeCoordinate>((a, b) => b.value - a.value);
 
   get trackingEnabled() {
@@ -126,6 +126,29 @@ class CanvasTransform {
   }
 
   /**
+   * Tries to center around the content as long as there is any as it is being tracked
+   * To track content call the trackShape for every Path2D shape you have created.
+   * @param ctx 
+   * @param scaleToFit 
+   */
+  recenterOnContent = (ctx: CanvasRenderingContext2D, scaleToFit: boolean = false, padding: [number, number] | number = 200) => {
+    if (!this.trackingEnabled) return this.recenter(ctx);
+    const top = { x: this.minX.peek.value, y: this.minY.peek.value }
+    const bottom = { x: this.maxX.peek.value, y: this.maxY.peek.value }
+
+    const middle = getMidPoint(top, bottom)
+
+    if (!scaleToFit) {
+      this.recenter(ctx, middle.x, middle.y);
+      return
+    }
+    const scaleNeeded = this.getContentScale(ctx, padding);
+    this.offset = this.offsetByPoint(ctx, scaleNeeded, middle.x, middle.y);
+    this.scale = scaleNeeded
+    listeners.forEach(l => l())
+  }
+
+  /**
    * 
    * @param listener - Callback method to notify something has changed
    * @returns - Method to unsubscribe the callback
@@ -178,15 +201,15 @@ class CanvasTransform {
     const canvasX = (width - newViewX) * devicePixelRatio
     const canvasY = (height - newViewY) * devicePixelRatio
 
-    const scaledDiffX = canvasX - canvasX /// scaledDiff
-    const scaledDiffY = canvasY - canvasY // scaledDiff
+    const scaledDiffX = canvasX - canvasX
+    const scaledDiffY = canvasY - canvasY
 
     let newOffset = { x: canvasX - scaledDiffX, y: canvasY - scaledDiffY }
     if (scale === 1) return newOffset;
 
     let matrix = this.getInitialMatrix(ctx);
     this.offset = newOffset
-    return this.calculateOffset(matrix, this.scale, x, y)
+    return this.calculateOffset(matrix, scale, x, y)
   }
 
   private getInitialMatrix(ctx: CanvasRenderingContext2D) {
@@ -196,6 +219,19 @@ class CanvasTransform {
     matrix.e = 0;
     matrix.f = 0;
     return matrix;
+  }
+
+  private getContentScale(ctx: CanvasRenderingContext2D, padding: [number, number] | number = 200) {
+    if (!this.trackingEnabled) return 1;
+    const { width, height } = ctx.canvas.getBoundingClientRect()
+    const contentWidth = this.maxX.peek.value - this.minX.peek.value;
+    const contentHeight = this.maxY.peek.value - this.maxY.peek.value;
+
+    const sidePadding = Array.isArray(padding) ? padding[0] : padding
+    const verticalPadding = Array.isArray(padding) ? padding[1] : padding
+    const actualScale = Math.min((width - sidePadding) / contentWidth, (height - verticalPadding) / contentHeight)
+    // lets limit to 1, no need to zoom in
+    return Math.min(1, actualScale)
   }
 }
 

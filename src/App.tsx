@@ -1,12 +1,12 @@
 import './App.css'
-import { TestContainer } from './components/TestContainer'
+import { ActionContainer } from './components/ActionContainer'
 import { CanvasContainer } from './lib'
 function App() {
   return (
     <>
-      <CanvasContainer fullScreen>
-        <TestContainer />
-      </CanvasContainer>
+      <CanvasContainer>
+        <ActionContainer />
+      </CanvasContainer >
     </>
   )
 }

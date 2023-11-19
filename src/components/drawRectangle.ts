@@ -17,5 +17,7 @@ export const drawRectangle = (x: number, y: number, ctx: CanvasRenderingContext2
   ctx.strokeStyle = '#646cff';
   ctx.lineWidth = 4;
   ctx.stroke(path);
+
+  return path;
 }
 
