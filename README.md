@@ -46,6 +46,22 @@ The nest thing we need to add is a listener for when redraw requests are made by
 ```tsx
 /** new line **/
 import { CanvasContainer, getCanvas2DContext} from '@practicaljs/react-canvas-kit'
+
+const drawRectangle = (x: number, y: number, ctx: CanvasRenderingContext2D, path?: CanvasPath2D) => {
+  if (!path) {
+    path = new Path2D()
+    path.roundRect(x, y, 100, 100, 4);
+  }
+
+  ctx.restore();
+  ctx.beginPath();
+  ctx.strokeStyle = '#646cff';
+  ctx.lineWidth = 4;
+  ctx.stroke(path);
+
+  return path;
+}
+
 import { getCanvasPoint } from '@practicaljs/canvas-kit';
 const handleClick = (e: React.MouseEvent) => {
   const ctx: CanvasRenderingContext2D | null = getCanvas2DContext();
@@ -70,24 +86,101 @@ const Actions = () => {
 ```
 
 
-You might have noticed that on scroll or zoom the canvas is clearing, the canvas is changing the transform and once is done it notifies listeners that they need to redraw their shapes.
+You might have noticed that on scroll or zoom the canvas is clearing.  Every time those operations occur the canvas clears itself, sets the transform and notifies listeners to redraw their shapes.  First modify the drawRectangle to store all the paths added.
 
 >When redrawing do now worry about chaging your x, y coordinates or scale, the canvas handles that for you.
 
 ```tsx
-// Depending on your use case you can bring the redraw into your react component
-// but since mine is pure I'll keep it outside
-const redraw = () => {}
+const paths: Path2D[] = []
+const drawRectangle = (x: number, y: number, ctx: CanvasRenderingContext2D, path?: Path2D) => {
+  if (!path) {
+    path = new Path2D()
+    path.roundRect(x, y, 100, 100, 4);
+    // add your new path to paths
+    paths.push(path);
+  }
+
+  ctx.restore();
+  ctx.beginPath();
+  ctx.strokeStyle = '#646cff';
+  ctx.lineWidth = 4;
+  ctx.stroke(path);
+
+  return path;
+}
+```
+
+```tsx
+const redraw = () => {
+  const ctx = getCanvas2DContext();
+  if (!ctx) return;
+  // loop througth every path added and call your redraw rectangle and pass in that component
+  // x and y are ignored since the path already has those values
+  for (let path of paths) {
+    window.requestAnimationFrame(() => drawRectangle(0, 0, ctx, path))
+  }
+}
+
 
 const Actions = () => {
   // this hook will call any callback provided
-  // this events are callbacks and don't use event or broadcast channels but you can add it in your redraw
   useRedrawEvent(redraw, []);
   return (
     <div style={{ width: '100%' }}></div>
   )
 }
 ```
+Try scrolling and zooming using
+> Built in scroll: Mouse wheel and trackpad
 
-#### Documentation in progress...
+> Built in zoom: ctrl/⌘ +, ctrl/⌘ -, ctrl/⌘ mouse wheel
+
+Now you should be able to scroll and zoom without loosing state
+Next lets create a zoom in and out button, this will show you how to use the canvas transform in react and how to call in their methods
+
+First create a ZoomComponent
+
+```tsx
+import { canvasTransform, getCanvas2DContext, requestRedraw } from '@practicaljs/react-canvas-kit';
+import { useSyncExternalStore } from 'react';
+
+const handleZoomOut = (e: React.MouseEvent) => {
+  e.preventDefault();
+  e.stopPropagation();
+  const ctx = getCanvas2DContext();
+  if (!ctx) return;
+  canvasTransform.changeScale(-0.1, ctx)
+  requestRedraw()
+}
+
+const handleZoomIn = (e: React.MouseEvent) => {
+  e.preventDefault();
+  e.stopPropagation();
+  const ctx = getCanvas2DContext();
+  if (!ctx) return;
+  canvasTransform.changeScale(0.1, ctx)
+  requestRedraw()
+}
+
+const resetZoom = (e: React.MouseEvent) => {
+  e.preventDefault();
+  e.stopPropagation();
+  const ctx = getCanvas2DContext();
+  if (!ctx) return;
+  const change = 1 - canvasTransform.scale
+  canvasTransform.changeScale(change, ctx)
+  requestRedraw()
+}
+
+export const ZoomComponent = () => {
+  const { scale } = useSyncExternalStore(canvasTransform.subscribe, canvasTransform.getSnapshot)
+  return (
+    <>
+      <button onClick={handleZoomOut}>-</button>
+      <button onClick={resetZoom}>{Math.round(scale * 100)}%</button>
+      <button onClick={handleZoomIn}>+</button>
+    </>
+  )
+}
+```
 

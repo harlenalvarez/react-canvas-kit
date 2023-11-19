@@ -13,12 +13,12 @@ export const useCanvasInteractions = ({ parentRef, enabled }: CanvasInteractions
     if (!parent || !enabled) return;
     parent.addEventListener('wheel', onScroll, { passive: false });
     parent.addEventListener('mousedown', onMouseClick);
-    parent.addEventListener('keypress', onKeyboard);
+    parent.addEventListener('keydown', onKeyboard);
     return () => {
       if (!parent || !enabled) return;
       parent.removeEventListener('wheel', onScroll);
       parent.removeEventListener('mousedown', onMouseClick);
-      parent.removeEventListener('keypress', onKeyboard)
+      parent.removeEventListener('keydown', onKeyboard)
     }
   }, [parentRef])
 }
@@ -87,8 +87,11 @@ const scrollOrPinchScale = (ev: WheelEvent) => {
   lastTime = now;
 }
 
+const isPlusOrMinus = (ev: KeyboardEvent) => {
+  return ev.key === '-' || ev.key === '='
+}
 const onKeyboard = (ev: KeyboardEvent) => {
-  if (ev.ctrlKey || ev.metaKey) {
+  if ((ev.ctrlKey || ev.metaKey) && isPlusOrMinus(ev)) {
     ev.preventDefault();
     if (ev.key === '-') changeScale(-.1);
     if (ev.key === '=') changeScale(.1);
@@ -102,9 +105,6 @@ const onKeyboard = (ev: KeyboardEvent) => {
 export const changeScale = (value: number, x?: number, y?: number) => {
   const ctx = getCanvas2DContext();
   if (!ctx) return;
-
-  // center pint for now
-
   canvasTransform.changeScale(value, ctx, x, y);
   requestRedraw();
 }

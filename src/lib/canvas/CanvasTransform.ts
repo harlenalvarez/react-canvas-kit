@@ -163,10 +163,10 @@ class CanvasTransform {
   getSnapshot = () => {
     if (
       transformObject.scale !== this._scale ||
-      transformObject.offset.x !== this._offset.x ||
-      transformObject.offset.y !== this._offset.y
+      transformObject.offset.x !== this.offset.x ||
+      transformObject.offset.y !== this.offset.y
     ) {
-      transformObject = { scale: this.scale, offset: this._offset }
+      transformObject = { scale: this.scale, offset: this.offset }
     }
 
     return transformObject

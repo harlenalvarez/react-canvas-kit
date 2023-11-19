@@ -1,13 +1,13 @@
 import { canvasTransform, getCanvas2DContext } from '@/canvas';
 import { requestRedraw, useRedrawEvent } from '@/hooks';
 import { getCanvasPoint } from '@practicaljs/canvas-kit';
+import { ZoomComponent } from './ZoomComponent';
 import { drawRectangle, paths } from './drawRectangle';
 
 const handleClick = (e: React.MouseEvent) => {
   const ctx = getCanvas2DContext();
   if (!ctx) return;
   const [x, y] = getCanvasPoint(e.nativeEvent.offsetX, e.nativeEvent.offsetY, ctx, false);
-  console.log(x, y)
   const path = drawRectangle(x, y, ctx);
   canvasTransform.trackShape(path.key, path.trackingPoint.x, path.trackingPoint.y);
 }
@@ -75,20 +75,13 @@ const checkIfInNode = (e: React.MouseEvent) => {
 export const ActionContainer = () => {
   useRedrawEvent(redraw, []);
   return (
-    <div id='test-test-test' style={{ width: '100%' }} onClick={handleClick}
-    //onMouseMove={checkIfInNode}
-    >
+    <div id='test-test-test' style={{ width: '100%' }} onClick={handleClick} onMouseMove={checkIfInNode}>
+      <ZoomComponent />
       <button onClick={recenter}>Recenter</button>
       <button onClick={recenterOnShape}>Recenter Shape</button>
       <button onClick={recenterOnContent}>Recenter around content</button>
       <button onClick={recenterOnContentAndScale}>Recenter around content and scale</button>
+
     </div>
   )
 }
-
-
-// Plan for tomorrow:
-// 1. Add method to track content
-// 2. Add method for recentering
-// 3. Add method for recentering around content
-
