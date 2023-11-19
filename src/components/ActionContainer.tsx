@@ -40,7 +40,7 @@ const recenterOnContent = (e: React.MouseEvent) => {
   requestRedraw()
 }
 
-const recenterOnContentAndScale = (e: React.MouseEvent) => {
+const scaleToFit = (e: React.MouseEvent) => {
   e.preventDefault()
   e.stopPropagation()
   const ctx = getCanvas2DContext();
@@ -75,12 +75,12 @@ const checkIfInNode = (e: React.MouseEvent) => {
 export const ActionContainer = () => {
   useRedrawEvent(redraw, []);
   return (
-    <div id='test-test-test' style={{ width: '100%' }} onClick={handleClick} onMouseMove={checkIfInNode}>
+    <div style={{ width: '100%' }} onClick={handleClick} onMouseMove={checkIfInNode}>
       <ZoomComponent />
       <button onClick={recenter}>Recenter</button>
       <button onClick={recenterOnShape}>Recenter Shape</button>
       <button onClick={recenterOnContent}>Recenter around content</button>
-      <button onClick={recenterOnContentAndScale}>Recenter around content and scale</button>
+      <button onClick={scaleToFit}>Recenter around content and scale</button>
 
     </div>
   )
