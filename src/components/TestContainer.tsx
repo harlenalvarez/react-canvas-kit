@@ -1,5 +1,5 @@
-import { getCanvas2DContext } from '@/canvas';
-import { useRedrawEvent } from '@/hooks';
+import { canvasTransform, getCanvas2DContext } from '@/canvas';
+import { requestRedraw, useRedrawEvent } from '@/hooks';
 import { getCanvasPoint } from '@practicaljs/canvas-kit';
 import { drawRectangle, paths } from './drawRectangle';
 
@@ -7,7 +7,28 @@ const handleClick = (e: React.MouseEvent) => {
   const ctx = getCanvas2DContext();
   if (!ctx) return;
   const [x, y] = getCanvasPoint(e.nativeEvent.offsetX, e.nativeEvent.offsetY, ctx, false);
+  console.log(x, y)
   drawRectangle(x, y, ctx);
+}
+
+const recenter = (e: React.MouseEvent) => {
+  e.preventDefault();
+  e.stopPropagation();
+  const ctx = getCanvas2DContext();
+  if (!ctx) return;
+  canvasTransform.recenter(ctx);
+  requestRedraw()
+}
+
+const recenterOnShape = (e: React.MouseEvent) => {
+  e.preventDefault();
+  e.stopPropagation();
+  const ctx = getCanvas2DContext();
+  if (!ctx) return;
+  const firstPath = paths[0]
+  console.log(firstPath.trackingPoint)
+  canvasTransform.recenter(ctx, firstPath.trackingPoint.x, firstPath.trackingPoint.y);
+  requestRedraw();
 }
 
 
@@ -39,7 +60,10 @@ export const TestContainer = () => {
   return (
     <div id='test-test-test' style={{ width: '100%' }} onClick={handleClick}
     //onMouseMove={checkIfInNode}
-    ></div>
+    >
+      <button onClick={recenter}>Recenter</button>
+      <button onClick={recenterOnShape}>Recenter Shape</button>
+    </div>
   )
 }
 

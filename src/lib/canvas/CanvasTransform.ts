@@ -1,4 +1,5 @@
 import { Point, clamp, getCanvasPointFromMatrix } from '@practicaljs/canvas-kit';
+import { PriorityQueue } from '@practicaljs/priority-queue';
 
 let listeners = new Set<() => void>();
 let transformObject = {
@@ -19,11 +20,25 @@ const roundToNearestTenThousandth = (number: number) => {
   return Math.round(number * 10000) / 10000;
 }
 
+type ShapeCoordinate = {
+  id: string
+  value: number
+}
+
 class CanvasTransform {
   private _scale: number = 1;
   private _offset: Point = { x: 0, y: 0 };
   readonly min = 0.1;
   readonly max = 4;
+
+  private minX = new PriorityQueue<ShapeCoordinate>((a, b) => a.value - b.value);
+  private minY = new PriorityQueue<ShapeCoordinate>((a, b) => b.value - a.value);
+  private maxX = new PriorityQueue<ShapeCoordinate>((a, b) => a.value - b.value);
+  private maxY = new PriorityQueue<ShapeCoordinate>((a, b) => b.value - a.value);
+
+  get trackingEnabled() {
+    return this.minX.length && this.minY.length && this.maxX.length && this.maxY.length;
+  }
 
   get scale() {
     return this._scale;
@@ -57,23 +72,56 @@ class CanvasTransform {
     const { width, height } = ctx.canvas.getBoundingClientRect()
     const xPoint = x ?? width / 2
     const yPoint = y ?? height / 2
-    const matrix = ctx.getTransform();
+    this.offset = this.calculateOffset(ctx.getTransform(), this.scale, xPoint, yPoint);
+    listeners.forEach(l => l())
+  }
 
-    matrix.a = prevScale
-    matrix.d = prevScale
+  /**
+   * Call track shape on any canvas component you want to track, without tracking them
+   * re-center and scale and recenter won't work
+   * @param id unique key / id to identify the shape
+   * @param x 
+   * @param y 
+   */
+  trackShape(key: string, x: number, y: number) {
+    this.minX.enqueue({ id: key, value: x });
+    this.maxX.enqueue({ id: key, value: x });
 
-    const prevRelativePoint = getCanvasPointFromMatrix(xPoint, yPoint, matrix)//getCanvasPointFromMatrix(width, height, matrix);
-    matrix.a = this.scale
-    matrix.d = this.scale
+    this.minY.enqueue({ id: key, value: y });
+    this.maxY.enqueue({ id: key, value: y });
+  }
 
-    const currentPoint = getCanvasPointFromMatrix(xPoint, yPoint, matrix)
+  /**
+   * Clear tracked shapes
+   */
+  clearTrackedShapes() {
+    this.minX.clear();
+    this.maxX.clear();
 
-    const offsetX = (currentPoint[0] - prevRelativePoint[0]) * this.scale;
-    const offsetY = (currentPoint[1] - prevRelativePoint[1]) * this.scale;
+    this.minY.clear();
+    this.maxY.clear();
+  }
 
-    const newOffsetX = this.offset.x + offsetX
-    const newOffsetY = this.offset.y + offsetY
-    this.offset = { x: newOffsetX, y: newOffsetY }
+  /**
+   * Recenter the canvas, if x or y is passed in it will recenter to that point else it will recenter in the middle
+   * @param ctx 
+   * @param x: number - canvas x coordinate, do not pass in a window or pointer coordinate. 
+   * @param y: number - canvas y coordinate, do not pass in a window or pointer coordinate.
+   * If you want to recenter around a pointer position first get the canvas point with getCanvasPoint(offsetX, offsetY, ctx)
+   */
+  recenter = (ctx: CanvasRenderingContext2D, x?: number, y?: number) => {
+    if (x && y) {
+      this.offset = this.offsetByPoint(ctx, this.scale, x, y)
+    } else {
+      this.offset = { x: 0, y: 0 }
+      if (this.scale !== 1) {
+        const matrix = this.getInitialMatrix(ctx);
+        const { width, height } = ctx.canvas.getBoundingClientRect()
+        const middleX = width / 2;
+        const middleY = height / 2;
+        this.offset = this.calculateOffset(matrix, this.scale, middleX, middleY);
+      }
+    }
     listeners.forEach(l => l())
   }
 
@@ -99,6 +147,55 @@ class CanvasTransform {
     }
 
     return transformObject
+  }
+
+  private calculateOffset(matrix: DOMMatrix, newScale: number, xPoint: number, yPoint: number) {
+    matrix.a = matrix.a / devicePixelRatio
+    matrix.d = matrix.d / devicePixelRatio
+    const prevRelativePoint = getCanvasPointFromMatrix(xPoint, yPoint, matrix)
+
+    matrix.a = newScale
+    matrix.d = newScale
+    const currentPoint = getCanvasPointFromMatrix(xPoint, yPoint, matrix)
+
+    const offsetX = (currentPoint[0] - prevRelativePoint[0]) * newScale;
+    const offsetY = (currentPoint[1] - prevRelativePoint[1]) * newScale;
+
+    const newOffsetX = this.offset.x + offsetX
+    const newOffsetY = this.offset.y + offsetY
+    return { x: newOffsetX, y: newOffsetY };
+  }
+
+  private offsetByPoint(ctx: CanvasRenderingContext2D, scale: number, x: number, y: number) {
+    const { width, height } = ctx.canvas.getBoundingClientRect()
+
+    let canvasHalfW = width / 2;
+    let canvasHalfH = height / 2;
+
+    const newViewX = x + canvasHalfW;
+    const newViewY = y + canvasHalfH;
+
+    const canvasX = (width - newViewX) * devicePixelRatio
+    const canvasY = (height - newViewY) * devicePixelRatio
+
+    const scaledDiffX = canvasX - canvasX /// scaledDiff
+    const scaledDiffY = canvasY - canvasY // scaledDiff
+
+    let newOffset = { x: canvasX - scaledDiffX, y: canvasY - scaledDiffY }
+    if (scale === 1) return newOffset;
+
+    let matrix = this.getInitialMatrix(ctx);
+    this.offset = newOffset
+    return this.calculateOffset(matrix, this.scale, x, y)
+  }
+
+  private getInitialMatrix(ctx: CanvasRenderingContext2D) {
+    const matrix = ctx.getTransform();
+    matrix.a = devicePixelRatio
+    matrix.d = devicePixelRatio
+    matrix.e = 0;
+    matrix.f = 0;
+    return matrix;
   }
 }
 
