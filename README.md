@@ -1,5 +1,8 @@
 # Canvas React Kit
 A comprehensive toolkit for handling common canvas functions in React. It includes features like setting up the canvas, managing transformations, handling events, and rendering popovers (coming... ).
+
+https://github.com/harlenalvarez/react-canvas-kit/assets/12262332/61fdaf18-5c50-4b91-991b-706e8cdff062
+
 ### Getting started
 
 First install the react canvas kit
