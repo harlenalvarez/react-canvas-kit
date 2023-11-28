@@ -13,6 +13,10 @@ const resizeObserver = new ResizeObserver((entries) => {
   initCanvas(body.contentRect.width, body.contentRect.height);
 });
 
+const onRezise = () => {
+  initCanvas(window.innerWidth, window.innerHeight)
+}
+
 export const getCanvas2DContext = (inCanvas?: HTMLCanvasElement | null): CanvasRenderingContext2D | null => {
   let canvas = inCanvas ?? getCanvasElement();
   if (!canvas) return null;
@@ -54,9 +58,9 @@ const setTransformOnChange = () => {
   setCanvasTransform(ctx);
 }
 
+const isSafari = () => /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
 let unsub: ReturnType<typeof canvasTransform.subscribe>;
 export const Canvas = ({ fullScreen, offsetTop }: CanvasProps) => {
-
   if (fullScreen) {
     onFullScreenCanvasLoad(offsetTop ?? 0);
   }
@@ -70,9 +74,25 @@ export const Canvas = ({ fullScreen, offsetTop }: CanvasProps) => {
 
   // TODO: Add else for non fullscreen mode
   useEffect(() => {
-    if (fullScreen) resizeObserver.observe(document.body, { box: 'device-pixel-content-box' });
+    if (fullScreen) {
+      // Special fix for a special browser (IE would be proud)
+      if(isSafari()) {
+        onRezise()
+        window.addEventListener('resize', onRezise)
+      }
+      else {
+        resizeObserver.observe(document.body, { box: 'device-pixel-content-box' });
+      }
+    }
     () => {
-      if (fullScreen) resizeObserver.disconnect();
+      if (fullScreen) {
+        if(isSafari()) {
+          window.removeEventListener('resize', onRezise)
+        }
+        else {
+          resizeObserver.disconnect();
+        }
+      }
     }
   }, [fullScreen])
 
