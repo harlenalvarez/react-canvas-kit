@@ -13,7 +13,7 @@ const resizeObserver = new ResizeObserver((entries) => {
   initCanvas(body.contentRect.width, body.contentRect.height);
 });
 
-const onRezise = () => {
+const handleResize = () => {
   initCanvas(window.innerWidth, window.innerHeight)
 }
 
@@ -77,8 +77,8 @@ export const Canvas = ({ fullScreen, offsetTop }: CanvasProps) => {
     if (fullScreen) {
       // Special fix for a special browser (IE would be proud)
       if(isSafari()) {
-        onRezise()
-        window.addEventListener('resize', onRezise)
+        handleResize()
+        window.addEventListener('resize', handleResize)
       }
       else {
         resizeObserver.observe(document.body, { box: 'device-pixel-content-box' });
@@ -87,10 +87,10 @@ export const Canvas = ({ fullScreen, offsetTop }: CanvasProps) => {
     () => {
       if (fullScreen) {
         if(isSafari()) {
-          window.removeEventListener('resize', onRezise)
+          window.removeEventListener('resize', handleResize)
         }
         else {
-          resizeObserver.disconnect();
+          resizeObserver.unobserve(document.body)
         }
       }
     }
