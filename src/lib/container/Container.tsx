@@ -30,7 +30,6 @@ export const CanvasContainerCss = {
 export const CanvasContainer = ({ offsetTop, children }: CanvasContainerProps) => {
   // V1 will only support fullscreen
   const fullScreen = true
-  console.log('rendeing container');
   const containerRef = useRef<HTMLDivElement>(null)
   useCanvasInteractions({
     enabled: fullScreen ?? false,
