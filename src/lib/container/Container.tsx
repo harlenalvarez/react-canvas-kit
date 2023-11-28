@@ -20,7 +20,7 @@ export type CanvasContainerProps = {
 const getFullScreenStyle = ({ offsetTop }: Omit<CanvasContainerProps, 'children'>) => {
   const minHeight = offsetTop ? `calc(100vh - ${offsetTop}px)` : '100vh';
   const top = offsetTop ? `${offsetTop}px` : '0';
-  return { top, minWidth: '100vw', minHeight } as React.CSSProperties
+  return { top, minWidth: '100%', minHeight } as React.CSSProperties
 }
 
 export const CanvasContainerCss = {
