@@ -1,6 +1,6 @@
 import { CanvasContainerProps } from '@/container';
 import { requestRedraw } from '@/hooks';
-import { useEffect } from 'react';
+import { useEffect, useLayoutEffect } from 'react';
 import { canvasTransform } from './CanvasTransform';
 
 type CanvasProps = {} & Omit<CanvasContainerProps, 'children'>
@@ -73,7 +73,7 @@ export const Canvas = ({ fullScreen, offsetTop }: CanvasProps) => {
   }, [])
 
   // TODO: Add else for non fullscreen mode
-  useEffect(() => {
+  useLayoutEffect(() => {
     if (fullScreen) {
       // Special fix for a special browser (IE would be proud)
       if(isSafari()) {
