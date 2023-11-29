@@ -1,6 +1,9 @@
 import { CanvasPath2D } from '@/index';
 
-export const paths: CanvasPath2D[] = []
+export let paths: CanvasPath2D[] = []
+export const clearPaths = () => {
+  paths = [];
+}
 export const drawRectangle = (x: number, y: number, ctx: CanvasRenderingContext2D, path?: CanvasPath2D) => {
   if (!path) {
     const key = crypto.randomUUID()

@@ -77,6 +77,18 @@ class CanvasTransform {
   }
 
   /**
+   * Resets the canvas, removes all listeners and clears all tracked shapes
+   * Common cases is for unmounting
+   */
+  reset() {
+    this.offset = { x: 0, y: 0 }
+    this.scale = 1
+    this.clearTrackedShapes();
+    listeners.forEach(l => l());
+    listeners.clear();
+  }
+
+  /**
    * Call track shape on any canvas component you want to track, without tracking them
    * re-center and scale and recenter won't work
    * @param id unique key / id to identify the shape

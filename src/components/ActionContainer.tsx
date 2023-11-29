@@ -1,8 +1,9 @@
 import { canvasTransform, getCanvas2DContext } from '@/canvas';
 import { requestRedraw, useRedrawEvent } from '@/hooks';
 import { getCanvasPoint } from '@practicaljs/canvas-kit';
+import { useEffect } from 'react';
 import { ZoomComponent } from './ZoomComponent';
-import { drawRectangle, paths } from './drawRectangle';
+import { clearPaths, drawRectangle, paths } from './drawRectangle';
 
 const handleClick = (e: React.MouseEvent) => {
   const ctx = getCanvas2DContext();
@@ -74,6 +75,11 @@ const checkIfInNode = (e: React.MouseEvent) => {
 
 export const ActionContainer = () => {
   useRedrawEvent(redraw, []);
+  useEffect(() => {
+    return () => {
+      clearPaths();
+    }
+  })
   return (
     <div style={{ width: '100%' }} onClick={handleClick} onMouseMove={checkIfInNode}>
       <ZoomComponent />
