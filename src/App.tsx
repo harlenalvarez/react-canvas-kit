@@ -1,13 +1,8 @@
 import './App.css'
-import { ActionContainer } from './components/ActionContainer'
-import { CanvasContainer } from './lib'
+import { Home } from './components/Home'
 function App() {
   return (
-    <>
-      <CanvasContainer>
-        <ActionContainer />
-      </CanvasContainer >
-    </>
+    <Home />
   )
 }
 

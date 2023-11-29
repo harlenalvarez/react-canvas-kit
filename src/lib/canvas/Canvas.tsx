@@ -84,7 +84,7 @@ export const Canvas = ({ fullScreen, offsetTop }: CanvasProps) => {
         resizeObserver.observe(document.body, { box: 'device-pixel-content-box' });
       }
     }
-    () => {
+    return () => {
       if (fullScreen) {
         if(isSafari()) {
           window.removeEventListener('resize', handleResize)
