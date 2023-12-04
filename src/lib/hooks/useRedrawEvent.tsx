@@ -1,4 +1,3 @@
-import { drawSubscribers } from '@/internal';
 import { clearCanvas } from '@practicaljs/canvas-kit';
 import { useEffect, useRef } from 'react';
 import { canvasTransform, getCanvas2DContext } from '..';
