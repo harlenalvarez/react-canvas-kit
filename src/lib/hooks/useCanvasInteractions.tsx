@@ -73,7 +73,6 @@ const stopMouseDrag = () => {
   document.removeEventListener('mouseup', onMouseUp)
 }
 
-//let lastTime: ReturnType<typeof Date.now>
 const scrollOrPinchScale = (ev: WheelEvent) => {
   ev.preventDefault();
   const pinchValue = ev.deltaY >= 0 ? -0.01 : 0.01
