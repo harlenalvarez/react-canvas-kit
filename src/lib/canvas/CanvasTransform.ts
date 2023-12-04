@@ -60,7 +60,6 @@ class CanvasTransform {
     const x = this.offset.x - deltaX;
     const y = this.offset.y - deltaY;
     this.offset = { x, y };
-
     listeners.forEach(l => l());
   }
 

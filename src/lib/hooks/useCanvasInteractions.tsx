@@ -20,7 +20,7 @@ export const useCanvasInteractions = ({ parentRef, enabled }: CanvasInteractions
       parent.removeEventListener('mousedown', onMouseClick);
       parent.removeEventListener('keydown', onKeyboard)
     }
-  }, [parentRef])
+  }, [parentRef, enabled])
 }
 
 
@@ -73,18 +73,11 @@ const stopMouseDrag = () => {
   document.removeEventListener('mouseup', onMouseUp)
 }
 
-let lastTime: ReturnType<typeof Date.now>
+//let lastTime: ReturnType<typeof Date.now>
 const scrollOrPinchScale = (ev: WheelEvent) => {
   ev.preventDefault();
-  if (!lastTime) {
-    lastTime = Date.now()
-  }
-
-  const now = Date.now();
-  if (now - lastTime < 16.67) return;
-  const pinchValue = ev.deltaY >= 0 ? -0.1 : 0.1
+  const pinchValue = ev.deltaY >= 0 ? -0.01 : 0.01
   changeScale(pinchValue, ev.offsetX, ev.offsetY)
-  lastTime = now;
 }
 
 const isPlusOrMinus = (ev: KeyboardEvent) => {
