@@ -50,12 +50,15 @@ const scaleToFit = (e: React.MouseEvent) => {
   requestRedraw()
 }
 
-const redraw = () => {
+const redrawAll = () => {
   const ctx = getCanvas2DContext();
   if (!ctx) return;
-  for (let path of paths) {
-    window.requestAnimationFrame(() => drawRectangle(0, 0, ctx, path))
+  for (const path of paths) {
+    drawRectangle(0, 0, ctx, path)
   }
+}
+const redraw = () => {
+  requestAnimationFrame(redrawAll)
 }
 
 const checkIfInNode = (e: React.MouseEvent) => {
@@ -66,8 +69,8 @@ const checkIfInNode = (e: React.MouseEvent) => {
   const clientY = e.nativeEvent.offsetY
   const [x, y] = getCanvasPoint(clientX, clientY, ctx, true);
   let isHovering = false;
-  for (let path of paths) {
-    isHovering = ctx.isPointInPath(path, x, y);
+  for (const path of paths) {
+    isHovering = ctx.isPointInPath(path.path, x, y);
     if (isHovering) break;
   }
   console.log('Is hovering on node ', isHovering);
@@ -81,7 +84,11 @@ export const ActionContainer = () => {
     }
   })
   return (
-    <div style={{ width: '100%' }} onClick={handleClick} onMouseMove={checkIfInNode}>
+    <div 
+    style={{ width: '100%' }} 
+    onClick={handleClick} 
+    //onMouseMove={checkIfInNode}
+    >
       <ZoomComponent />
       <button onClick={recenter}>Recenter</button>
       <button onClick={recenterOnShape}>Recenter Shape</button>

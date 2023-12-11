@@ -3,7 +3,7 @@ import { requestRedraw } from '@/hooks';
 import { useEffect, useLayoutEffect } from 'react';
 import { canvasTransform } from './CanvasTransform';
 
-type CanvasProps = {} & Omit<CanvasContainerProps, 'children'>
+type CanvasProps = object & Omit<CanvasContainerProps, 'children'>
 
 const canvasId = 'pj-react-canvas-kit-canvas-element';
 const getCanvasElement = () => document.getElementById(canvasId) as HTMLCanvasElement | null
@@ -18,7 +18,7 @@ const handleResize = () => {
 }
 
 export const getCanvas2DContext = (inCanvas?: HTMLCanvasElement | null): CanvasRenderingContext2D | null => {
-  let canvas = inCanvas ?? getCanvasElement();
+  const canvas = inCanvas ?? getCanvasElement();
   if (!canvas) return null;
   return canvas.getContext('2d');
 }
@@ -66,7 +66,7 @@ export const Canvas = ({ fullScreen, offsetTop }: CanvasProps) => {
   }
 
   useEffect(() => {
-    unsub = canvasTransform.subscribe(setTransformOnChange);
+    unsub = canvasTransform.syncSubscribe(setTransformOnChange);
     return () => {
       if (unsub) unsub();
     }

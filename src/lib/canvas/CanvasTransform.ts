@@ -1,7 +1,8 @@
 import { Point, clamp, getCanvasPointFromMatrix, getMidPoint } from '@practicaljs/canvas-kit';
 import { PriorityQueue } from '@practicaljs/priority-queue';
 
-let listeners = new Set<() => void>();
+const listeners = new Set<() => void>();
+const syncListeners = new Set<() => void>();
 let transformObject = {
   scale: 1,
   offset: { x: 0, y: 0 }
@@ -60,7 +61,8 @@ class CanvasTransform {
     const x = this.offset.x - deltaX;
     const y = this.offset.y - deltaY;
     this.offset = { x, y };
-    listeners.forEach(l => l());
+    this.syncNotify()
+    this.notify()
   }
 
   changeScale(value: number, ctx: CanvasRenderingContext2D, x?: number, y?: number) {
@@ -72,7 +74,8 @@ class CanvasTransform {
     const xPoint = x ?? width / 2
     const yPoint = y ?? height / 2
     this.offset = this.calculateOffset(ctx.getTransform(), this.scale, xPoint, yPoint);
-    listeners.forEach(l => l())
+    this.syncNotify()
+    this.notify()
   }
 
   /**
@@ -85,6 +88,8 @@ class CanvasTransform {
     this.clearTrackedShapes();
     listeners.forEach(l => l());
     listeners.clear();
+    syncListeners.forEach(l => l())
+    syncListeners.clear();
   }
 
   /**
@@ -133,7 +138,8 @@ class CanvasTransform {
         this.offset = this.calculateOffset(matrix, this.scale, middleX, middleY);
       }
     }
-    listeners.forEach(l => l())
+    this.syncNotify();
+    this.notify();
   }
 
   /**
@@ -156,7 +162,8 @@ class CanvasTransform {
     const scaleNeeded = this.getContentScale(ctx, padding);
     this.offset = this.offsetByPoint(ctx, scaleNeeded, middle.x, middle.y);
     this.scale = scaleNeeded
-    listeners.forEach(l => l())
+    this.syncNotify()
+    this.notify()
   }
 
   /**
@@ -171,6 +178,18 @@ class CanvasTransform {
     }
   }
 
+  /**
+   * Only use this for listeners that need to notify sync, like transforms
+   * @param listener - Callback method to notify something has changed
+   * @returns - Method to unsubscribe the callback
+   */
+  syncSubscribe = (listener: () => void) => {
+    syncListeners.add(listener);
+    return () => {
+      syncListeners.delete(listener);
+    }
+  }
+
   getSnapshot = () => {
     if (
       transformObject.scale !== this._scale ||
@@ -181,6 +200,17 @@ class CanvasTransform {
     }
 
     return transformObject
+  }
+
+  private syncNotify() {
+    syncListeners.forEach(l => l())
+  }
+
+  private notify(): Promise<void> {
+    return new Promise(res => {
+      listeners.forEach(l => l());
+      res();
+    })
   }
 
   private calculateOffset(matrix: DOMMatrix, newScale: number, xPoint: number, yPoint: number) {
@@ -203,8 +233,8 @@ class CanvasTransform {
   private offsetByPoint(ctx: CanvasRenderingContext2D, scale: number, x: number, y: number) {
     const { width, height } = ctx.canvas.getBoundingClientRect()
 
-    let canvasHalfW = width / 2;
-    let canvasHalfH = height / 2;
+    const canvasHalfW = width / 2;
+    const canvasHalfH = height / 2;
 
     const newViewX = x + canvasHalfW;
     const newViewY = y + canvasHalfH;
@@ -215,10 +245,10 @@ class CanvasTransform {
     const scaledDiffX = canvasX - canvasX
     const scaledDiffY = canvasY - canvasY
 
-    let newOffset = { x: canvasX - scaledDiffX, y: canvasY - scaledDiffY }
+    const newOffset = { x: canvasX - scaledDiffX, y: canvasY - scaledDiffY }
     if (scale === 1) return newOffset;
 
-    let matrix = this.getInitialMatrix(ctx);
+    const matrix = this.getInitialMatrix(ctx);
     this.offset = newOffset
     return this.calculateOffset(matrix, scale, x, y)
   }
