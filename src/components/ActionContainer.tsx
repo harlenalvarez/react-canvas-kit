@@ -87,7 +87,7 @@ export const ActionContainer = () => {
     <div 
     style={{ width: '100%' }} 
     onClick={handleClick} 
-    //onMouseMove={checkIfInNode}
+    onMouseMove={checkIfInNode}
     >
       <ZoomComponent />
       <button onClick={recenter}>Recenter</button>
