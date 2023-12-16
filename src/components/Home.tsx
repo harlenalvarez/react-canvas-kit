@@ -9,11 +9,11 @@ const Container = () => {
     }
   })
   return (
-    <>
+    <div style={{background: 'white'}}>
       <CanvasContainer offsetTop={50}>
         <ActionContainer />
       </CanvasContainer >
-    </>
+    </div>
   )
 
 }
