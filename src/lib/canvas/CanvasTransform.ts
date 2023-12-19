@@ -266,7 +266,7 @@ class CanvasTransform {
     if (!this.trackingEnabled) return 1;
     const { width, height } = ctx.canvas.getBoundingClientRect()
     const contentWidth = this.maxX.peek.value - this.minX.peek.value;
-    const contentHeight = this.maxY.peek.value - this.maxY.peek.value;
+    const contentHeight = this.maxY.peek.value - this.minY.peek.value;
 
     const sidePadding = Array.isArray(padding) ? padding[0] : padding
     const verticalPadding = Array.isArray(padding) ? padding[1] : padding
