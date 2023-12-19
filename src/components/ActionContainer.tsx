@@ -159,7 +159,7 @@ const clearReadrawAll = () => {
   redrawAll(ctx)
 }
 
-const redrawAll = (ctx?: CanvasRenderingContext2D | null) => {
+const redrawAll = (ctx?: CanvasRenderingContext2D | null | number) => {
   ctx = typeof ctx === 'number' || !ctx ? getCanvas2DContext() : ctx;
   if (!ctx) return;
 
