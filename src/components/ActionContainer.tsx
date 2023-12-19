@@ -95,7 +95,7 @@ const onDrag = (e: React.MouseEvent) => {
   draggedNode.component.setPoint(new Vector2D(x, y))
   updatePathPoint(draggedNode.component)
 
-  updateSprings()
+  updateSprings(1)
   
   for(const toUpdate of detectAndSolveCollisions(draggedNode)) {
     updatePathPoint(draggedNode.component)
@@ -256,12 +256,12 @@ const startAnimation = (e: React.MouseEvent) => {
   requestAnimationFrame(animateGraph)
 }
 
-const startForce = () => {
-  for(const capsule of Object.values(rigidBodies)) {
-    if(capsule.component.force.x === 0 && capsule.component.force.y === 0)
-     capsule.component.addForce(new Vector2D(1, 1))
-  }
-}
+// const startForce = () => {
+//   for(const capsule of Object.values(rigidBodies)) {
+//     if(capsule.component.force.x === 0 && capsule.component.force.y === 0)
+//      capsule.component.addForce(new Vector2D(1, 1))
+//   }
+// }
 
 const updatePathPoint = (node: RigidNode) => {
   for(const path of paths) {
@@ -270,17 +270,17 @@ const updatePathPoint = (node: RigidNode) => {
   }
 }
 
-const updateBodies = () => {
-  const friction = .5
-  for(const capsule of Object.values(rigidBodies)) {
-    capsule.component.update(2, friction);
-    capsule.component.force = Vector2D.zero
-    for(const path of paths) {
-      if(path.key !== capsule.component.id) continue;
-      path.changeTrackingPoint(capsule.component.point)
-    }
-  }
-}
+//const updateBodies = () => {
+  //   const friction = .5
+  //   for(const capsule of Object.values(rigidBodies)) {
+  //     capsule.component.update(2, friction);
+  //     capsule.component.force = Vector2D.zero
+  //     for(const path of paths) {
+  //       if(path.key !== capsule.component.id) continue;
+  //       path.changeTrackingPoint(capsule.component.point)
+  //     }
+  //   }
+  // }
 
 const updateSprings = (dampener: number) => {
   for(const spring of repulsiveNodes) {
@@ -345,22 +345,22 @@ const detectAndHandleCollitions = () => {
   }
 }
 
-function getContactPoint(capsule: BoxCapsule<RigidNode>, other: BoxCapsule<RigidNode>): Vector2D {
-  const point: Vector2D = capsule.component.point
-  const otherPoint: Vector2D = other.component.point
+// function getContactPoint(capsule: BoxCapsule<RigidNode>, other: BoxCapsule<RigidNode>): Vector2D {
+//   const point: Vector2D = capsule.component.point
+//   const otherPoint: Vector2D = other.component.point
 
-  // Calculate the overlap on each axis
-  let xOverlap = (otherPoint.x + other.width - point.x);
-  let yOverlap = (otherPoint.y + other.height - point.y);
+//   // Calculate the overlap on each axis
+//   let xOverlap = (otherPoint.x + other.width - point.x);
+//   let yOverlap = (otherPoint.y + other.height - point.y);
   
-  if(Math.abs(xOverlap) < Math.abs(yOverlap)) {
-      // Contact on left or right side of rectangles
-      return new Vector2D(point.x + xOverlap/2, otherPoint.y);
-  } else {
-      // Contact on top or bottom of rectangles
-      return new Vector2D(otherPoint.x, point.y + yOverlap/2);
-  }
-}
+//   if(Math.abs(xOverlap) < Math.abs(yOverlap)) {
+//       // Contact on left or right side of rectangles
+//       return new Vector2D(point.x + xOverlap/2, otherPoint.y);
+//   } else {
+//       // Contact on top or bottom of rectangles
+//       return new Vector2D(otherPoint.x, point.y + yOverlap/2);
+//   }
+// }
 
 const containBodies = () => {
   for(const capsule of Object.values(rigidBodies)) {

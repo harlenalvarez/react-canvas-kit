@@ -16,10 +16,10 @@ type React2dProps = {
   width: number
 }
 export class Rect2D extends CanvasPath2D {
-  icon: Path2D
-  path: Path2D
+  icon!: Path2D
+  path!: Path2D
   point: Point
-  font: string
+  font!: string
   height: number
   width: number
   constructor({ key, point, height, width }: React2dProps) {
