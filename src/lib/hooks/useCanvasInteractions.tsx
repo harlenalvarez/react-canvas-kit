@@ -1,3 +1,4 @@
+import { clamp } from '@practicaljs/canvas-kit';
 import { useEffect } from 'react';
 import { canvasTransform, getCanvas2DContext, requestRedraw } from '..';
 export type CanvasInteractionsProps = {
@@ -75,8 +76,9 @@ const stopMouseDrag = () => {
 
 const scrollOrPinchScale = (ev: WheelEvent) => {
   ev.preventDefault();
-  const pinchValue = ev.deltaY >= 0 ? -0.01 : 0.01
-  changeScale(pinchValue, ev.offsetX, ev.offsetY)
+  const mx = clamp(ev.deltaY, -10, 10)
+  const pinchValue = Math.round(mx + Number.EPSILON)/100
+  changeScale(-pinchValue, ev.offsetX, ev.offsetY)
 }
 
 const isPlusOrMinus = (ev: KeyboardEvent) => {
