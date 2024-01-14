@@ -1,5 +1,4 @@
-import { canvasTransform, getCanvas2DContext, requestRedraw } from '@/index';
-import { useSyncExternalStore } from 'react';
+import { canvasTransform, getCanvas2DContext, requestRedraw, useTransformSelect } from '@/index';
 
 const handleZoomOut = (e: React.MouseEvent) => {
   e.preventDefault();
@@ -29,8 +28,9 @@ const resetZoom = (e: React.MouseEvent) => {
   requestRedraw()
 }
 
+
 export const ZoomComponent = () => {
-  const { scale } = useSyncExternalStore(canvasTransform.subscribe, canvasTransform.getSnapshot)
+  const scale = useTransformSelect('scale')
   return (
     <>
       <button onClick={handleZoomOut}>-</button>

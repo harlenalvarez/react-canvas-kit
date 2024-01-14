@@ -1,10 +1,47 @@
 import { canvasTransform, getCanvas2DContext } from '@/canvas';
 import { requestRedraw, useRedrawEvent } from '@/hooks';
 import { clearAll } from '@/utils';
-import { BoxCapsule, Point, RigidNode, Spring, Vector2D, getCanvasCenter, getCanvasPoint } from '@practicaljs/canvas-kit';
+import { BoxCapsule, Point, RigidNode, Vector2D, getCanvasCenter, getCanvasPoint, getDistance, getLineRotation, lineRectInterceptionPoint, linearInterpolation, rotateRect } from '@practicaljs/canvas-kit';
 import { useEffect } from 'react';
 import { ZoomComponent } from './ZoomComponent';
 import { Rect2D, clearPaths, drawRectangle, nodeConnections, paths } from './drawRectangle';
+
+
+/**
+ * The spring ties together 2 rigid nodes, spring forces will be automatically applied to keep the object at the given distance.
+ * If the spring is repulsive, it will make sure that the 2 rigid nodes are not within the given distance but not prevent streching past that
+ */
+export class Spring {
+  constructor(public nodeA: RigidNode, public nodeB: RigidNode, public k: number, public tension: number, public repulsive: boolean) { }
+
+  private calculateProximity(source: number, target: number) {
+    const diff = Math.abs(target - source);
+    return diff / source + 1
+  }
+
+  update = (dampener: number = 1) => {
+    const delta = this.nodeB.point.subtract(this.nodeA.point);
+    const distance = delta.magnitude() || Number.EPSILON;
+    const diff = this.tension - distance;
+    // if the is a repulvice spring we only want to move the nodes away from each other
+    if (this.repulsive && diff < 0) return;
+    const percentage = diff / distance / 2;
+    const rate = this.calculateProximity(this.tension, distance);
+    const dampenerScaled = Math.min(rate * dampener, 4)
+    if(dampenerScaled > 1) {
+      console.log('Geater then 1', dampenerScaled)
+    }
+    const offset = delta.scale(percentage).scale(dampenerScaled);
+
+    if (!this.nodeA.isKinematic) {
+      this.nodeA.setPoint(this.nodeA.point.subtract(offset))
+    }
+
+    if (!this.nodeB.isKinematic) {
+      this.nodeB.setPoint(this.nodeB.point.add(offset))
+    }
+  }
+}
 
 const K = .98
 const TENSION = 150
@@ -18,6 +55,8 @@ let draging = false;
 let draggedNode: BoxCapsule<RigidNode> | null;
 let edgeKeys: Set<string> = new Set();
 let repulsiveNodes: Spring[] = []
+const springGraph: Record<string, Spring[]> = {};
+
 
 const setKey = (a: string, b: string) => {
   edgeKeys.add(`${a}:${b}`)
@@ -40,11 +79,24 @@ const handleClick = (e: React.MouseEvent) => {
     if(!rigidBodies[clickedPath.key] || !rigidBodies[previousPath.key]) {
       mapToRigidBodies();
     }
+    const idA = rigidBodies[previousPath.key].component.id;
+    if(!springGraph[idA]) springGraph[idA] = []
+    const aLength = (springGraph[idA]?.length ?? 0) + 1
+    const idB = rigidBodies[clickedPath.key].component.id;
+    if(!springGraph[idB]) springGraph[idB] = []
+    const bLength = (springGraph[idB]?.length ?? 0) + 1
+    const length = Math.max(aLength, bLength);
+    const totalWidth = 141 * 2;
+    const totalCircumference = totalWidth * length / (2*Math.PI)
+    const desiredTension = Math.max(TENSION, totalCircumference)
+    console.log('Tension ', desiredTension)
     const spring = new Spring(
-      rigidBodies[previousPath.key].component, rigidBodies[clickedPath.key].component, K, TENSION, false
+      rigidBodies[previousPath.key].component, rigidBodies[clickedPath.key].component, K, desiredTension, false
     )
+    springGraph[idA].push(spring);
+    springGraph[idB].push(spring);
     nodeConnections.push(spring)
-    drawLine(ctx, previousPath.trackingPoint, clickedPath.trackingPoint);
+    drawLineInterseptingLine(ctx, rigidBodies[previousPath.key], rigidBodies[clickedPath.key]);
     previousPath = null;
     return
   }
@@ -172,7 +224,7 @@ const redrawAll = (ctx?: CanvasRenderingContext2D | null | number) => {
   ctx.save()
   ctx.strokeStyle = 'black'
   for(const spring of Object.values(nodeConnections)) {
-    drawLine(ctx, spring.nodeA.point, spring.nodeB.point)
+    drawLineInterseptingLine(ctx, rigidBodies[spring.nodeA.id], rigidBodies[spring.nodeB.id])
   }
   ctx.restore()
   for (const path of paths) {
@@ -184,12 +236,48 @@ const redraw = () => {
   requestAnimationFrame(redrawAll)
 }
 
-const drawLine = (ctx: CanvasRenderingContext2D, a: Point, b: Point) => {
+
+const drawLineInterseptingLine = (ctx: CanvasRenderingContext2D, a: BoxCapsule<RigidNode>, b: BoxCapsule<RigidNode>) => {
+  const start = a.component.point;
+  const end = b.component.point;
+
+  const aLine = lineRectInterceptionPoint(start, end, a.startPoint, a.width, a.height);
+  const bLine = lineRectInterceptionPoint(start, end, b.startPoint, b.width, b.height);
+  if(!aLine || !bLine) {
+    ctx.beginPath()
+    ctx.moveTo(a.component.point.x, a.component.point.y)
+    ctx.lineTo(b.component.point.x, b.component.point.y)
+    ctx.stroke()
+    return;
+  }
+  const point = linearInterpolation(aLine, bLine, .95);
+
   ctx.beginPath()
-  ctx.moveTo(a.x, a.y)
-  ctx.lineTo(b.x, b.y)
+  ctx.moveTo(aLine.x, aLine.y);
+  ctx.lineTo(bLine.x, bLine.y)
   ctx.stroke()
+  // Calculate the gradient of the line
+  const angle = getLineRotation(aLine, bLine);
+  const desiredWidth = 100;
+  const height = 20;
+  const x = point.x - desiredWidth;
+  const y = point.y - height/2;
+  const halfX = x + desiredWidth/2
+  ctx.fillStyle = 'white'
+  ctx.save()
+  ctx.beginPath()
+  rotateRect(ctx, angle, point, desiredWidth, true);
+
+  ctx.roundRect(x, y, desiredWidth, height, 10);
+  ctx.stroke()
+  ctx.fill()
+  ctx.fillStyle = 'black';
+  ctx.textBaseline = 'middle';
+  ctx.textAlign = 'center';
+  ctx.fillText('Sample', halfX, point.y);
+  ctx.restore()
 }
+
 
 const checkIfInNode = (e: React.MouseEvent) => {
   const ctx = getCanvas2DContext();
@@ -227,7 +315,7 @@ const addRepulsiveSrings = () => {
     for(const other of Object.values(rigidBodies)) {
       if(n === other) continue;
       if(hasKey(n.component.id, other.component.id)) continue;
-      const spring = new Spring(n.component, other.component, K, TENSION, true);
+      const spring = new Spring(n.component, other.component, K, TENSION * 2, true);
       repulsiveNodes.push(spring)
       setKey(n.component.id, other.component.id)
     }
@@ -252,7 +340,7 @@ const startAnimation = (e: React.MouseEvent) => {
   // })
   lastFrameTime = null;
   lastEnergy = 0;
-  temp = 1;
+  temp = .5;
   requestAnimationFrame(animateGraph)
 }
 
@@ -294,7 +382,6 @@ const updateSprings = (dampener: number) => {
     updatePathPoint(spring.nodeA)
     updatePathPoint(spring.nodeB)
   }
-
 
 }
 
@@ -395,17 +482,15 @@ const animateGraph = (timestamp: number) => {
     
     if(energy < 1)
       detectAndHandleCollitions()
-    containBodies()
+    //containBodies()
     clearReadrawAll()
 
-    console.log('Energy ', energy);
     if(Math.abs(energy-lastEnergy) <= 0.001) {
       console.log('Stopping')
       return;
     }
     lastEnergy = energy
     temp = cool(temp)
-    console.log(temp)
   }
   if(stop) return;
   requestAnimationFrame(animateGraph)

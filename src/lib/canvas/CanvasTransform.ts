@@ -3,10 +3,20 @@ import { PriorityQueue } from '@practicaljs/priority-queue';
 
 const listeners = new Set<() => void>();
 const syncListeners = new Set<() => void>();
+const trackingListeners = new Set<() => void>();
 let transformObject = {
   scale: 1,
   offset: { x: 0, y: 0 }
 }
+
+const initTrackingObject = {
+  x1: 0,
+  y1: 0,
+  x2: 0,
+  y2: 0,
+  enabled: false,
+}
+let trackingObject = { ...initTrackingObject }
 
 // TODO: move to canvas-kit
 export const screenToWorld = (currentMatrix: DOMMatrix, x: number, y: number): Point => {
@@ -26,19 +36,21 @@ type ShapeCoordinate = {
   value: number
 }
 
-class CanvasTransform {
+export class CanvasTransform {
   private _scale: number = 1;
   private _offset: Point = { x: 0, y: 0 };
   readonly min = 0.1;
   readonly max = 4;
+
+  public foo: string = ''
 
   private minX = new PriorityQueue<ShapeCoordinate>((a, b) => a.value - b.value);
   private minY = new PriorityQueue<ShapeCoordinate>((a, b) => a.value - b.value);
   private maxX = new PriorityQueue<ShapeCoordinate>((a, b) => b.value - a.value);
   private maxY = new PriorityQueue<ShapeCoordinate>((a, b) => b.value - a.value);
 
-  get trackingEnabled() {
-    return this.minX.length && this.minY.length && this.maxX.length && this.maxY.length;
+  get trackingEnabled(): boolean {
+    return Boolean(this.minX.length && this.minY.length && this.maxX.length && this.maxY.length);
   }
 
   get scale() {
@@ -105,6 +117,7 @@ class CanvasTransform {
 
     this.minY.enqueue({ id: key, value: y });
     this.maxY.enqueue({ id: key, value: y });
+    this.trackingNotify();
   }
 
   /**
@@ -202,6 +215,29 @@ class CanvasTransform {
     return transformObject
   }
 
+  trackingSubscribe = (listener: () => void) => {
+    trackingListeners.add(listener);
+    return () => {
+      trackingListeners.delete(listener);
+    }
+  }
+
+  getTrackingSnapshot = () => {
+    if (!trackingObject.enabled && !this.trackingEnabled) return trackingObject;
+    if (!this.trackingEnabled && trackingObject.enabled) {
+      trackingObject = { ...initTrackingObject }
+    }
+    else if (
+      trackingObject.x1 !== this.minX.peek.value ||
+      trackingObject.x2 !== this.maxX.peek.value ||
+      trackingObject.y1 !== this.minY.peek.value ||
+      trackingObject.y2 !== this.maxY.peek.value
+    ) {
+      trackingObject = { enabled: this.trackingEnabled, x1: this.minX.peek.value, x2: this.maxX.peek.value, y1: this.minY.peek.value, y2: this.maxY.peek.value }
+    }
+    return trackingObject
+  }
+
   private syncNotify() {
     syncListeners.forEach(l => l())
   }
@@ -209,6 +245,13 @@ class CanvasTransform {
   private notify(): Promise<void> {
     return new Promise(res => {
       listeners.forEach(l => l());
+      res();
+    })
+  }
+
+  private trackingNotify(): Promise<void> {
+    return new Promise(res => {
+      trackingListeners.forEach(l => l());
       res();
     })
   }
@@ -275,7 +318,7 @@ class CanvasTransform {
     return Math.min(1, actualScale)
   }
 }
-
+export type CanvasTransformManager = CanvasTransform;
 /**
  * This canvas can be used with React useExternalStoreSync
  * If want to use your store, call the subscribe method and pass in your own callback that well be called when any data is changed.

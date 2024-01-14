@@ -69,14 +69,14 @@ export class Rect2D extends CanvasPath2D {
   changeTrackingPoint(point: Point) {
     this.trackingPoint = { ...point };
     this.point.x = point.x - this.width / 2
-    this.point.y = point.y - this.width / 2
+    this.point.y = point.y - this.height / 2
     this.initPaths()
   }
 
   changePoint(point: Point) {
     this.point = point;
     this.trackingPoint.x = this.point.x + this.width / 2
-    this.trackingPoint.y = this.point.y + this.width / 2
+    this.trackingPoint.y = this.point.y + this.height / 2
     this.initPaths()
   }
 }
