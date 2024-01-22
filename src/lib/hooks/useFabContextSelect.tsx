@@ -9,17 +9,15 @@ export function useFabContextSelect<T extends keyof CanvasModelContextKeys>(fabI
   const [selectValue, setSelectValue] = useState<CanvasFabContextType[T]>(context[modalProperty])
 
   const onChange = useCallback(() => {
-    if(selectValue !== context[modalProperty]) {
       setSelectValue(context[modalProperty])
-    }
-  }, [selectValue, modalProperty, context])
+  }, [modalProperty, context])
 
   useEffect(() => {
     const unsub = context.subscribe(onChange);
     return () => {
       unsub();
     }
-  }, [onChange, context])
+  }, [onChange, context, selectValue])
 
   return selectValue
 }
