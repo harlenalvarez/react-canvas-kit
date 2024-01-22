@@ -54,9 +54,10 @@ class CanvasFabContext {
     this.notify();
   }
 
-  changeFabPosition = (point: Point) => {
+  changeFabPosition = (point: Point, path: Path2D) => {
     const pointToChange = { ...point };
     this._position = pointToChange
+    this._path = path;
     this.notify();
   }
 

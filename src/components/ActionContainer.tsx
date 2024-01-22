@@ -356,14 +356,14 @@ const updatePathPoint = (node: RigidNode) => {
     
     if(fab.open && fab.key === path.key) {
       const fabPoint = {x: path.trackingPoint.x, y: path.point.y + path.width + 10}
-      fab.changeFabPosition(fabPoint)
+      fab.changeFabPosition(fabPoint, path.path)
       continue;
     }
 
     const vertical = getFabContext('vertical')
     if(vertical.open && vertical.key === path.key) {
       const fabPoint ={x: path.point.x + path.width, y: path.trackingPoint.y}
-      vertical.changeFabPosition(fabPoint)
+      vertical.changeFabPosition(fabPoint, path.path)
       continue;
     }
   }
