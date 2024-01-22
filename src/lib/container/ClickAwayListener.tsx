@@ -1,6 +1,6 @@
 import { getCanvasPoint } from '@practicaljs/canvas-kit';
 import { ReactNode, useCallback, useEffect, useRef } from 'react';
-import { getCanvas2DContext, getFabContext, useFabContextSelect } from '..';
+import { getCanvas2DContext, getFabContext } from '..';
 
 type ClickAwayListenerProps = {
     children: ReactNode;
