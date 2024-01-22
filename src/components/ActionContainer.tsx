@@ -4,7 +4,7 @@ import { getFabContext } from '@/container/canvas-fab/CanvasFabContext';
 import { requestRedraw, useRedrawEvent } from '@/hooks';
 import { clearAll } from '@/utils';
 import { Button, ButtonGroup } from '@mui/material';
-import { BoxCapsule, Point, RigidNode, Spring, Vector2D, getCanvasCenter, getCanvasPoint, getLineRotation, lineRectInterceptionPoint, linearInterpolation, rotateRect } from '@practicaljs/canvas-kit';
+import { BoxCapsule, RigidNode, Spring, Vector2D, getCanvasCenter, getCanvasPoint, getLineRotation, lineRectInterceptionPoint, linearInterpolation, rotateRect } from '@practicaljs/canvas-kit';
 import { useEffect } from 'react';
 import { ZoomComponent } from './ZoomComponent';
 import { Rect2D, clearPaths, drawRectangle, nodeConnections, paths } from './drawRectangle';
@@ -25,7 +25,7 @@ let lastFrameTime: number | null;
 let lastEnergy  = 0;
 let rigidBodies: Record<string, BoxCapsule<RigidNode>> = {};
 let stop = true;
-let centerPoint: Point;
+//let centerPoint: Point;
 let draging = false;
 let draggedNode: BoxCapsule<RigidNode> | null;
 let edgeKeys: Set<string> = new Set();
@@ -213,7 +213,7 @@ const redrawAll = (ctx?: CanvasRenderingContext2D | null | number) => {
   if (!ctx) return;
 
   const [x, y] = getCanvasCenter(ctx)
-  centerPoint = { x: x-300,y: y-300}
+  //centerPoint = { x: x-300,y: y-300}
   ctx.rect(x - 300, y - 300, 600, 600)
   ctx.stroke()
   ctx.beginPath();
