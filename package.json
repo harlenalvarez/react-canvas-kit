@@ -43,7 +43,7 @@
     "test:w": "vitest"
   },
   "dependencies": {  
-    "@practicaljs/canvas-kit": ">=0.9.4",
+    "@practicaljs/canvas-kit": ">=0.9.10",
     "@practicaljs/priority-queue": ">=1.1.3",
     "react": ">=18.0.0",
     "react-dom": ">=18.0.0",

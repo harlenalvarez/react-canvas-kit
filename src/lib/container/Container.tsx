@@ -54,6 +54,7 @@ export const CanvasContainer = ({ offsetTop, children, includeScrollBars }: Canv
   }, [containerRef, layout, offsetTop]);
 
   return (
+    <>
     <div style={layout} className={CanvasContainerCss.container} ref={containerRef}>
       <section id='canvas-kit-action-section' style={nestedComponents} className={styles.main} tabIndex={1}>
         {children}
@@ -64,5 +65,7 @@ export const CanvasContainer = ({ offsetTop, children, includeScrollBars }: Canv
         { includeScrollBars && <Scrollbars />}
       </section>
     </div>
+    <div className={styles.modalContainer} id='rck-canvas-portal-container' />
+    </>
   );
 };

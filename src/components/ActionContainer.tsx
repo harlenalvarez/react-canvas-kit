@@ -1,10 +1,16 @@
 import { canvasTransform, getCanvas2DContext } from '@/canvas';
+import { CanvasFab } from '@/container';
+import { getFabContext } from '@/container/canvas-fab/CanvasFabContext';
 import { requestRedraw, useRedrawEvent } from '@/hooks';
 import { clearAll } from '@/utils';
-import { BoxCapsule, Point, RigidNode, Vector2D, getCanvasCenter, getCanvasPoint, getDistance, getLineRotation, lineRectInterceptionPoint, linearInterpolation, rotateRect } from '@practicaljs/canvas-kit';
+import { Button, ButtonGroup } from '@mui/material';
+import { BoxCapsule, Point, RigidNode, Vector2D, getCanvasCenter, getCanvasPoint, getLineRotation, lineRectInterceptionPoint, linearInterpolation, rotateRect } from '@practicaljs/canvas-kit';
 import { useEffect } from 'react';
 import { ZoomComponent } from './ZoomComponent';
 import { Rect2D, clearPaths, drawRectangle, nodeConnections, paths } from './drawRectangle';
+
+
+
 
 
 /**
@@ -74,7 +80,15 @@ const handleClick = (e: React.MouseEvent) => {
   const ctx = getCanvas2DContext();
   if (!ctx) return;
   const clickedPath = checkIfInNode(e);
-  
+  if(e.shiftKey && clickedPath) {
+    const modal = getFabContext('one-and-only')
+    modal.openFab({
+      position: {x: clickedPath.trackingPoint.x, y: clickedPath.point.y},
+      key: clickedPath.key,
+      path: clickedPath.path
+    })
+    return;
+  }
   if(clickedPath && previousPath) {
     if(!rigidBodies[clickedPath.key] || !rigidBodies[previousPath.key]) {
       mapToRigidBodies();
@@ -113,6 +127,8 @@ const handleClick = (e: React.MouseEvent) => {
     clearPaths()
     edgeKeys = new Set();
     repulsiveNodes = []
+    const context = getFabContext('one-and-only')
+    context.close();
     return;
   }
 
@@ -137,6 +153,16 @@ const handleDrag = (e: React.MouseEvent) => {
   draging = true;
 }
 
+const onPointerUp =(e: React.MouseEvent) => {
+  e.preventDefault()
+  e.stopPropagation()
+
+  if(draging) {
+    draggedNode = null
+    draging = false;
+  }
+}
+
 const onDrag = (e: React.MouseEvent) => {
   e.preventDefault()
   e.stopPropagation()
@@ -158,13 +184,6 @@ const onDrag = (e: React.MouseEvent) => {
     clearAll(ctx)
     redrawAll(ctx)
   })
-}
-
-const stopDrag = (e: React.MouseEvent) => {
-  e.preventDefault()
-  e.stopPropagation()
-  draggedNode = null
-  draging = false;
 }
 
 const recenter = (e: React.MouseEvent) => {
@@ -236,7 +255,6 @@ const redraw = () => {
   requestAnimationFrame(redrawAll)
 }
 
-
 const drawLineInterseptingLine = (ctx: CanvasRenderingContext2D, a: BoxCapsule<RigidNode>, b: BoxCapsule<RigidNode>) => {
   const start = a.component.point;
   const end = b.component.point;
@@ -244,10 +262,12 @@ const drawLineInterseptingLine = (ctx: CanvasRenderingContext2D, a: BoxCapsule<R
   const aLine = lineRectInterceptionPoint(start, end, a.startPoint, a.width, a.height);
   const bLine = lineRectInterceptionPoint(start, end, b.startPoint, b.width, b.height);
   if(!aLine || !bLine) {
+    const linePath = new Path2D()
+    linePath.moveTo(a.component.point.x, a.component.point.y)
+    linePath.lineTo(b.component.point.x, b.component.point.y)
     ctx.beginPath()
-    ctx.moveTo(a.component.point.x, a.component.point.y)
-    ctx.lineTo(b.component.point.x, b.component.point.y)
-    ctx.stroke()
+  
+    ctx.stroke(linePath)
     return;
   }
   const point = linearInterpolation(aLine, bLine, .95);
@@ -277,7 +297,6 @@ const drawLineInterseptingLine = (ctx: CanvasRenderingContext2D, a: BoxCapsule<R
   ctx.fillText('Sample', halfX, point.y);
   ctx.restore()
 }
-
 
 const checkIfInNode = (e: React.MouseEvent) => {
   const ctx = getCanvas2DContext();
@@ -355,6 +374,12 @@ const updatePathPoint = (node: RigidNode) => {
   for(const path of paths) {
     if(path.key !== node.id) continue;
     path.changeTrackingPoint(node.point)
+    const fab = getFabContext('one-and-only')
+    
+    if(fab.open && fab.key === path.key) {
+      const fabPoint = {x: path.trackingPoint.x, y: path.point.y}
+      fab.changeFabPosition(fabPoint)
+    }
   }
 }
 
@@ -497,19 +522,24 @@ const animateGraph = (timestamp: number) => {
 }
 
 export const ActionContainer = () => {
+
   useRedrawEvent(redraw, []);
   useEffect(() => {
     return () => {
       clearPaths();
+      const context = getFabContext('one-and-only')
+      context.close();
     }
-  })
+  });
+
   return (
+    <>
     <div 
     style={{ width: '100%' }} 
     onClick={handleClick}
     onPointerDown={handleDrag}
-    onPointerMoveCapture={onDrag}
-    onPointerUp={stopDrag}
+    onPointerMove={onDrag}
+    onPointerUp={onPointerUp}
     >
       <ZoomComponent />
       <button onClick={recenter}>Recenter</button>
@@ -523,5 +553,18 @@ export const ActionContainer = () => {
         stop = true
         }}>Stop Anim</button>
     </div>
+    {/* <CanvasModal modalId='one-and-only' offsetTop={50}>
+      <ButtonGroup>
+        <Button onClick={() => console.log('Option 1')}>Option 1</Button>
+        <Button>Option 2</Button>
+      </ButtonGroup>
+    </CanvasModal> */}
+    <CanvasFab fabId='one-and-only' offsetTop={50}>
+      <ButtonGroup>
+        <Button onClick={() => console.log('Option 1')}>Option 1</Button>
+        <Button>Option 2</Button>
+      </ButtonGroup>
+    </CanvasFab>
+    </>
   )
 }

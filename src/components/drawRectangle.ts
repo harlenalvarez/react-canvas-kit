@@ -1,4 +1,4 @@
-import { CanvasPath2D } from '@/index';
+import { CanvasPath2D, getFabContext } from '@/index';
 import { Point, Spring, parseFont } from '@practicaljs/canvas-kit';
 
 export let paths: Rect2D[] = []
