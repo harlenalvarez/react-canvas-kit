@@ -67,17 +67,17 @@ const drawScrollBars = () => {
     const contentOffset = mostLeft - x;
 
      // Calculate the difference between centers
-    const centerDifference = centerX - m
+    const centerDifference = centerX - mX
     
     // Normalize the difference and adjust to a 0-1 range
     const normalizedDifference = (centerDifference / trackingWidth) + 0.5;
     const proportionalCenter = Math.max(0, Math.min(normalizedDifference, 1));
 
 
-    let staringPointX = scrollbarCenterX - totalWidth / 2
+    let staringPointX = proportionalCenter - totalWidth / 2
     staringPointX = clamp(staringPointX, x + marginLeft, x + width - totalWidth - marginRight)
 
-    console.log(`View port center: ${centerX}, content center: ${mX}, proportional center: ${proportionalCenterX}`)
+    console.log(`View port center: ${centerX}, content center: ${mX}, proportional center: ${proportionalCenter}`)
     console.log(`Content Offset: ${contentOffset}, Visible Content Width: ${width}`);
     console.log(`Content Ratio: ${contentRatio}, Total Width: ${totalWidth}, Starting Point X: ${staringPointX}`);
     

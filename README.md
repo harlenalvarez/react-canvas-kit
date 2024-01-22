@@ -381,6 +381,143 @@ export const CanvasManager = () => {
 };
 ```
 
+#### 7. Canvas Floating Action Buttons
+
+The `<CanvasFab {...props} />` element allows for regular dom elements to be
+placed on top of canvas components like toolbars.
+
+1. Start by creating your CanvasFab container after your static canvas FAB
+   layout.
+
+```tsx
+const CanvasManager = (props) => {
+  return (
+    <>
+      <div
+        style={{ width: "100%" }}
+        onClick={handleClick}
+      >
+        {/*rest of code */}
+      </div>
+      <CanvasFab
+        fabId="fab-id"
+        offsetTop={50}
+        orientation="horizontal"
+        placement="top"
+      >
+        <ButtonGroup>
+          <Button onClick={() => console.log("Option 1")}>Option 1</Button>
+          <Button>Option 2</Button>
+        </ButtonGroup>
+      </CanvasFab>
+    </>
+  );
+};
+```
+
+> The fabId to allow for multiple types of fabs, but only one can be active at a
+> time.
+
+2. Opening the Fab. Listen to your path click event and pass in the x y
+   coordinates of the shape. Ideally you want the X value to be in the center of
+   the shape if rendering top or bottom, and your y to be at the top or bottom
+   of your shape with some margin. If showing a vertical tool bar then then
+   opposite.
+
+```tsx
+const checkIfInNode = (e: React.MouseEvent) => {
+  const ctx = getCanvas2DContext();
+  if (!ctx) return null;
+  const clientX = e.nativeEvent.offsetX;
+  const clientY = e.nativeEvent.offsetY;
+  const [x, y] = getCanvasPoint(clientX, clientY, ctx, true);
+  for (const path of paths) {
+    if (ctx.isPointInPath(path.path, x, y)) {
+      return path;
+    }
+  }
+  return null;
+};
+
+const onClick = (e: React.MouseEvent) => {
+  const ctx = getCanvas2DContext();
+  if (!ctx) return;
+  const clickedPath = checkIfInNode(e);
+  const modal = getFabContext("fab-id");
+  modal.openFab({
+    // the y coordinate has a 10 padding ( is minus because we are rendering on the top )
+    position: { x: clickedPath.trackingPoint.x, y: clickedPath.point.y - 10 },
+    key: clickedPath.key,
+    path: clickedPath.path,
+  });
+  return;
+};
+```
+
+> Like any other method in this library, we opted to use services to allow for
+> use outside of react.
+
+3. Placement options. Canvas Fab allows for orientation and placement to be
+   passed. The default values are horizontal and top for rendering a horizontal
+   FAB at the top of the element, but if you want to change the placement you
+   would have to add either the width or height to your coordidnates. Here are
+   some examples
+
+```tsx
+// for horizontal and top
+modal.openFab({
+  position: { x: clickedPath.trackingPoint.x, y: clickedPath.point.y - 10 },
+  ...rest,
+});
+// horizontal and bottom
+modal.openFab({
+  position: {
+    x: clickedPath.trackingPoint.x,
+    y: clickedPath.point.y + clickedPath.width + 10,
+  },
+  ...rest,
+});
+// vertical and left
+modal.openFab({
+  position: { x: clickedPath.point.x - 10, y: clickedPath.trackingPoint.y },
+  ...rest,
+});
+// vertical and right
+modal.openFab({
+  position: {
+    x: clickedPath.point.x + clickedPath.width + 10,
+    y: clickedPath.trackingPoint.y,
+  },
+  ...rest,
+});
+```
+
+4. Dragging shapes. Canvas Fab listens to transform events, but in the event you
+   support dragging of individual shapes, make sure to notify fab context that
+   the shape position has changed.
+
+```tsx
+const fab = getFabContext("fab-id");
+if (fab.open && fab.key === path.key) {
+  // make sure the fab point matches the open fab point logic
+  const fabPoint = {
+    x: path.trackingPoint.x,
+    y: path.point.y + path.width + 10,
+  };
+  fab.changeFabPosition(fabPoint);
+}
+```
+
+5. To close just call the close method
+
+```tsx
+const context = getFabContext("one-and-only");
+context.close();
+```
+
+> We have a click outside listener that will automatically close when clicking
+> outside the element or the FAB container
+
 You've successfully set up and explored the Canvas React Kit. Feel free to
 explore further and customize the Canvas React Kit for your project needs. If
 you have questions, you can always reach out to me on twitter @AlvarezHarlen.

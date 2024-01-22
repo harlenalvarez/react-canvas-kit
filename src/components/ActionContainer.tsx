@@ -83,7 +83,16 @@ const handleClick = (e: React.MouseEvent) => {
   if(e.shiftKey && clickedPath) {
     const modal = getFabContext('one-and-only')
     modal.openFab({
-      position: {x: clickedPath.trackingPoint.x, y: clickedPath.point.y},
+      position: {x: clickedPath.trackingPoint.x, y: clickedPath.point.y + clickedPath.width + 10},
+      key: clickedPath.key,
+      path: clickedPath.path
+    })
+    return;
+  }
+  if(e.metaKey && clickedPath) {
+    const modal = getFabContext('vertical')
+    modal.openFab({
+      position: {x: clickedPath.point.x - 10, y: clickedPath.trackingPoint.y},
       key: clickedPath.key,
       path: clickedPath.path
     })
@@ -377,8 +386,16 @@ const updatePathPoint = (node: RigidNode) => {
     const fab = getFabContext('one-and-only')
     
     if(fab.open && fab.key === path.key) {
-      const fabPoint = {x: path.trackingPoint.x, y: path.point.y}
+      const fabPoint = {x: path.trackingPoint.x, y: path.point.y + path.width + 10}
       fab.changeFabPosition(fabPoint)
+      continue;
+    }
+
+    const vertical = getFabContext('vertical')
+    if(vertical.open && vertical.key === path.key) {
+      const fabPoint ={x: path.point.x + path.width, y: path.trackingPoint.y}
+      vertical.changeFabPosition(fabPoint)
+      continue;
     }
   }
 }
@@ -553,14 +570,14 @@ export const ActionContainer = () => {
         stop = true
         }}>Stop Anim</button>
     </div>
-    {/* <CanvasModal modalId='one-and-only' offsetTop={50}>
+    <CanvasFab fabId='one-and-only' offsetTop={50} orientation='horizontal' placement='bottom'>
       <ButtonGroup>
         <Button onClick={() => console.log('Option 1')}>Option 1</Button>
         <Button>Option 2</Button>
       </ButtonGroup>
-    </CanvasModal> */}
-    <CanvasFab fabId='one-and-only' offsetTop={50}>
-      <ButtonGroup>
+    </CanvasFab>
+    <CanvasFab fabId='vertical' offsetTop={50} orientation='vertical' placement='right'>
+      <ButtonGroup orientation='vertical'>
         <Button onClick={() => console.log('Option 1')}>Option 1</Button>
         <Button>Option 2</Button>
       </ButtonGroup>
