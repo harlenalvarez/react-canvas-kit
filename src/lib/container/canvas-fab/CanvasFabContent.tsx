@@ -11,7 +11,6 @@ type CMCProps = {
 }
 
 const getModalX = (x: number, modalWidth: number, orientation: CMCProps['orientation'], placement: CMCProps['placement']) => {
-  console.log(orientation, placement)
   if(orientation === 'vertical' && placement === 'left') return x;
   return x - modalWidth;
 }
