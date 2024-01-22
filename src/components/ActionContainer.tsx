@@ -460,15 +460,15 @@ const detectAndHandleCollitions = () => {
 //   }
 // }
 
-const containBodies = () => {
-  for(const capsule of Object.values(rigidBodies)) {
-    capsule.component.contain(centerPoint, 600, 600)
-    for(const path of paths) {
-      if(path.key !== capsule.component.id) continue;
-      path.changeTrackingPoint(capsule.component.point)
-    }
-  }
-}
+// const containBodies = () => {
+//   for(const capsule of Object.values(rigidBodies)) {
+//     capsule.component.contain(centerPoint, 600, 600)
+//     for(const path of paths) {
+//       if(path.key !== capsule.component.id) continue;
+//       path.changeTrackingPoint(capsule.component.point)
+//     }
+//   }
+// }
 
 const getEnergy = () => {
   let energy = 0;

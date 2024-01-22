@@ -35,7 +35,7 @@ const drawScrollBars = () => {
   const mostRight = Math.max(x2, x + width);
   const mostTop = Math.min(y1, y);
   const mostBottom = Math.max(y2, y + height);
-  const {x: mX, y: mY} = getMidPoint({x: mostLeft, y: mostTop}, {x: mostRight, y: mostBottom});
+  const {x: mX} = getMidPoint({x: mostLeft, y: mostTop}, {x: mostRight, y: mostBottom});
 
   const trackingWidth = mostRight - mostLeft;
   //const trackingHeight = mostBottom - mostTop;
