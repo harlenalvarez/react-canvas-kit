@@ -1,6 +1,5 @@
-import { clamp, fromAlphaToHex, getCanvasCenter, getMidPoint } from '@practicaljs/canvas-kit'
-import { useEffect, useSyncExternalStore } from 'react'
-import { canvasTransform, getCanvas2DContext, useRedrawEvent } from '..'
+import { clamp, fromAlphaToHex, getCanvasCenter, getMidPoint } from '@practicaljs/canvas-kit';
+import { canvasTransform, getCanvas2DContext, useRedrawEvent } from '..';
 
 export type ScrollbarsProps = {
   enabled: boolean
@@ -39,7 +38,7 @@ const drawScrollBars = () => {
   const {x: mX, y: mY} = getMidPoint({x: mostLeft, y: mostTop}, {x: mostRight, y: mostBottom});
 
   const trackingWidth = mostRight - mostLeft;
-  const trackingHeight = mostBottom - mostTop;
+  //const trackingHeight = mostBottom - mostTop;
   const needsScrollBarHorizontal = x1 < x || x2 > x + width;
   const needsScrollBarVertical = y1 < y || y2 > y + height;
 

@@ -4,7 +4,7 @@ import { getFabContext } from '@/container/canvas-fab/CanvasFabContext';
 import { requestRedraw, useRedrawEvent } from '@/hooks';
 import { clearAll } from '@/utils';
 import { Button, ButtonGroup } from '@mui/material';
-import { BoxCapsule, Point, RigidNode, Vector2D, getCanvasCenter, getCanvasPoint, getLineRotation, lineRectInterceptionPoint, linearInterpolation, rotateRect } from '@practicaljs/canvas-kit';
+import { BoxCapsule, Point, RigidNode, Spring, Vector2D, getCanvasCenter, getCanvasPoint, getLineRotation, lineRectInterceptionPoint, linearInterpolation, rotateRect } from '@practicaljs/canvas-kit';
 import { useEffect } from 'react';
 import { ZoomComponent } from './ZoomComponent';
 import { Rect2D, clearPaths, drawRectangle, nodeConnections, paths } from './drawRectangle';
@@ -17,37 +17,6 @@ import { Rect2D, clearPaths, drawRectangle, nodeConnections, paths } from './dra
  * The spring ties together 2 rigid nodes, spring forces will be automatically applied to keep the object at the given distance.
  * If the spring is repulsive, it will make sure that the 2 rigid nodes are not within the given distance but not prevent streching past that
  */
-export class Spring {
-  constructor(public nodeA: RigidNode, public nodeB: RigidNode, public k: number, public tension: number, public repulsive: boolean) { }
-
-  private calculateProximity(source: number, target: number) {
-    const diff = Math.abs(target - source);
-    return diff / source + 1
-  }
-
-  update = (dampener: number = 1) => {
-    const delta = this.nodeB.point.subtract(this.nodeA.point);
-    const distance = delta.magnitude() || Number.EPSILON;
-    const diff = this.tension - distance;
-    // if the is a repulvice spring we only want to move the nodes away from each other
-    if (this.repulsive && diff < 0) return;
-    const percentage = diff / distance / 2;
-    const rate = this.calculateProximity(this.tension, distance);
-    const dampenerScaled = Math.min(rate * dampener, 4)
-    if(dampenerScaled > 1) {
-      console.log('Geater then 1', dampenerScaled)
-    }
-    const offset = delta.scale(percentage).scale(dampenerScaled);
-
-    if (!this.nodeA.isKinematic) {
-      this.nodeA.setPoint(this.nodeA.point.subtract(offset))
-    }
-
-    if (!this.nodeB.isKinematic) {
-      this.nodeB.setPoint(this.nodeB.point.add(offset))
-    }
-  }
-}
 
 const K = .98
 const TENSION = 150
