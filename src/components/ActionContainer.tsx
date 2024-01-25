@@ -22,7 +22,7 @@ const K = .98
 const TENSION = 150
 let previousPath: Rect2D | null = null;
 let lastFrameTime: number | null;
-let lastEnergy  = 0;
+let lastEnergy = 0;
 let rigidBodies: Record<string, BoxCapsule<RigidNode>> = {};
 let stop = true;
 //let centerPoint: Point;
@@ -45,41 +45,41 @@ const hasKey = (a: string, b: string) => {
 }
 
 const handleClick = (e: React.MouseEvent) => {
-  if(e.altKey || draging) return;
+  if (e.altKey || draging) return;
   const ctx = getCanvas2DContext();
   if (!ctx) return;
   const clickedPath = checkIfInNode(e);
-  if(e.shiftKey && clickedPath) {
+  if (e.shiftKey && clickedPath) {
     const modal = getFabContext('one-and-only')
     modal.openFab({
-      position: {x: clickedPath.trackingPoint.x, y: clickedPath.point.y + clickedPath.width + 10},
+      position: { x: clickedPath.trackingPoint.x, y: clickedPath.point.y + clickedPath.width + 10 },
       key: clickedPath.key,
       path: clickedPath.path
     })
     return;
   }
-  if(e.metaKey && clickedPath) {
+  if (e.metaKey && clickedPath) {
     const modal = getFabContext('vertical')
     modal.openFab({
-      position: {x: clickedPath.point.x - 10, y: clickedPath.trackingPoint.y},
+      position: { x: clickedPath.point.x - 10, y: clickedPath.trackingPoint.y },
       key: clickedPath.key,
       path: clickedPath.path
     })
     return;
   }
-  if(clickedPath && previousPath) {
-    if(!rigidBodies[clickedPath.key] || !rigidBodies[previousPath.key]) {
+  if (clickedPath && previousPath) {
+    if (!rigidBodies[clickedPath.key] || !rigidBodies[previousPath.key]) {
       mapToRigidBodies();
     }
     const idA = rigidBodies[previousPath.key].component.id;
-    if(!springGraph[idA]) springGraph[idA] = []
+    if (!springGraph[idA]) springGraph[idA] = []
     const aLength = (springGraph[idA]?.length ?? 0) + 1
     const idB = rigidBodies[clickedPath.key].component.id;
-    if(!springGraph[idB]) springGraph[idB] = []
+    if (!springGraph[idB]) springGraph[idB] = []
     const bLength = (springGraph[idB]?.length ?? 0) + 1
     const length = Math.max(aLength, bLength);
     const totalWidth = 141 * 2;
-    const totalCircumference = totalWidth * length / (2*Math.PI)
+    const totalCircumference = totalWidth * length / (2 * Math.PI)
     const desiredTension = Math.max(TENSION, totalCircumference)
     console.log('Tension ', desiredTension)
     const spring = new Spring(
@@ -92,11 +92,11 @@ const handleClick = (e: React.MouseEvent) => {
     previousPath = null;
     return
   }
-  if(clickedPath) {
+  if (clickedPath) {
     previousPath = clickedPath;
     return
   }
-  if(e.metaKey) {
+  if (e.metaKey) {
     stop = true
     draging = false
     previousPath = null
@@ -118,24 +118,24 @@ const handleClick = (e: React.MouseEvent) => {
 
 const handleDrag = (e: React.MouseEvent) => {
   e.stopPropagation()
-  if(!e.altKey) return;
+  if (!e.altKey) return;
   e.preventDefault()
 
   const clickedPath = checkIfInNode(e);
-  if(!clickedPath) return;
+  if (!clickedPath) return;
 
-  if(!rigidBodies?.length) {
+  if (!rigidBodies?.length) {
     mapToRigidBodies()
   }
   draggedNode = rigidBodies[clickedPath.key]
   draging = true;
 }
 
-const onPointerUp =(e: React.MouseEvent) => {
+const onPointerUp = (e: React.MouseEvent) => {
   e.preventDefault()
   e.stopPropagation()
 
-  if(draging) {
+  if (draging) {
     draggedNode = null
     draging = false;
   }
@@ -145,15 +145,15 @@ const onDrag = (e: React.MouseEvent) => {
   e.preventDefault()
   e.stopPropagation()
   const ctx = getCanvas2DContext()
-  if(!ctx) return
-  if(!e.altKey || !draggedNode || !draging) return;
+  if (!ctx) return
+  if (!e.altKey || !draggedNode || !draging) return;
   const [x, y] = getCanvasPoint(e.nativeEvent.offsetX, e.nativeEvent.offsetY, ctx);
   draggedNode.component.setPoint(new Vector2D(x, y))
   updatePathPoint(draggedNode.component)
 
   updateSprings(1)
-  
-  for(const toUpdate of detectAndSolveCollisions(draggedNode)) {
+
+  for (const toUpdate of detectAndSolveCollisions(draggedNode)) {
     updatePathPoint(draggedNode.component)
     updatePathPoint(toUpdate.component)
   }
@@ -197,12 +197,12 @@ const scaleToFit = (e: React.MouseEvent) => {
   e.stopPropagation()
   const ctx = getCanvas2DContext();
   if (!ctx) return;
-  canvasTransform.recenterOnContent(ctx, true)
+  canvasTransform.recenterOnContent(ctx, true, 100)
   requestRedraw()
 }
 
 const clearReadrawAll = () => {
-  const ctx =  getCanvas2DContext();
+  const ctx = getCanvas2DContext();
   if (!ctx) return;
   clearAll(ctx)
   redrawAll(ctx)
@@ -220,7 +220,7 @@ const redrawAll = (ctx?: CanvasRenderingContext2D | null | number) => {
 
   ctx.save()
   ctx.strokeStyle = 'black'
-  for(const spring of Object.values(nodeConnections)) {
+  for (const spring of Object.values(nodeConnections)) {
     drawLineInterseptingLine(ctx, rigidBodies[spring.nodeA.id], rigidBodies[spring.nodeB.id])
   }
   ctx.restore()
@@ -239,12 +239,12 @@ const drawLineInterseptingLine = (ctx: CanvasRenderingContext2D, a: BoxCapsule<R
 
   const aLine = lineRectInterceptionPoint(start, end, a.startPoint, a.width, a.height);
   const bLine = lineRectInterceptionPoint(start, end, b.startPoint, b.width, b.height);
-  if(!aLine || !bLine) {
+  if (!aLine || !bLine) {
     const linePath = new Path2D()
     linePath.moveTo(a.component.point.x, a.component.point.y)
     linePath.lineTo(b.component.point.x, b.component.point.y)
     ctx.beginPath()
-  
+
     ctx.stroke(linePath)
     return;
   }
@@ -259,8 +259,8 @@ const drawLineInterseptingLine = (ctx: CanvasRenderingContext2D, a: BoxCapsule<R
   const desiredWidth = 100;
   const height = 20;
   const x = point.x - desiredWidth;
-  const y = point.y - height/2;
-  const halfX = x + desiredWidth/2
+  const y = point.y - height / 2;
+  const halfX = x + desiredWidth / 2
   ctx.fillStyle = 'white'
   ctx.save()
   ctx.beginPath()
@@ -283,7 +283,7 @@ const checkIfInNode = (e: React.MouseEvent) => {
   const clientY = e.nativeEvent.offsetY
   const [x, y] = getCanvasPoint(clientX, clientY, ctx, true);
   for (const path of paths) {
-    if(ctx.isPointInPath(path.path, x, y)) {
+    if (ctx.isPointInPath(path.path, x, y)) {
       return path
     }
   }
@@ -293,13 +293,13 @@ const checkIfInNode = (e: React.MouseEvent) => {
 const mapToRigidBodies = () => {
   const keyBody: Record<string, BoxCapsule<RigidNode>> = {}
   const rigidBodiesLocal = paths.map(p => {
-    const rigid = new RigidNode(p.key, new Vector2D(p.trackingPoint.x, p.trackingPoint.y),Vector2D.zero, Vector2D.zero, 1, false, .1)
+    const rigid = new RigidNode(p.key, new Vector2D(p.trackingPoint.x, p.trackingPoint.y), Vector2D.zero, Vector2D.zero, 1, false, .1)
     return new BoxCapsule(rigid, p.width, p.height)
   })
   //rigidBodiesLocal[rigidBodiesLocal.length-1].component.isKinematic = true;
   rigidBodiesLocal.forEach(body => {
     keyBody[body.component.id] = body;
-    if(!rigidBodies[body.component.id])
+    if (!rigidBodies[body.component.id])
       rigidBodies[body.component.id] = body
     else
       rigidBodies[body.component.id].component.setPoint(body.component.point)
@@ -308,10 +308,10 @@ const mapToRigidBodies = () => {
 }
 
 const addRepulsiveSrings = () => {
-  for(const n of Object.values(rigidBodies)) {
-    for(const other of Object.values(rigidBodies)) {
-      if(n === other) continue;
-      if(hasKey(n.component.id, other.component.id)) continue;
+  for (const n of Object.values(rigidBodies)) {
+    for (const other of Object.values(rigidBodies)) {
+      if (n === other) continue;
+      if (hasKey(n.component.id, other.component.id)) continue;
       const spring = new Spring(n.component, other.component, K, TENSION * 2, true);
       repulsiveNodes.push(spring)
       setKey(n.component.id, other.component.id)
@@ -328,7 +328,7 @@ const startAnimation = (e: React.MouseEvent) => {
   addRepulsiveSrings();
 
   //rigidBodies[rigidBodies.length-1].component.isKinematic = true;
- 
+
   // console.log(rigidBodies[0].force)
   // springs = nodeConnections.map(([a, b]) => {
   //   const aNode = keyBody[a.key];
@@ -349,20 +349,20 @@ const startAnimation = (e: React.MouseEvent) => {
 // }
 
 const updatePathPoint = (node: RigidNode) => {
-  for(const path of paths) {
-    if(path.key !== node.id) continue;
+  for (const path of paths) {
+    if (path.key !== node.id) continue;
     path.changeTrackingPoint(node.point)
     const fab = getFabContext('one-and-only')
-    
-    if(fab.open && fab.key === path.key) {
-      const fabPoint = {x: path.trackingPoint.x, y: path.point.y + path.width + 10}
+
+    if (fab.open && fab.key === path.key) {
+      const fabPoint = { x: path.trackingPoint.x, y: path.point.y + path.width + 10 }
       fab.changeFabPosition(fabPoint, path.path)
       continue;
     }
 
     const vertical = getFabContext('vertical')
-    if(vertical.open && vertical.key === path.key) {
-      const fabPoint ={x: path.point.x + path.width, y: path.trackingPoint.y}
+    if (vertical.open && vertical.key === path.key) {
+      const fabPoint = { x: path.point.x + path.width, y: path.trackingPoint.y }
       vertical.changeFabPosition(fabPoint, path.path)
       continue;
     }
@@ -370,25 +370,25 @@ const updatePathPoint = (node: RigidNode) => {
 }
 
 //const updateBodies = () => {
-  //   const friction = .5
-  //   for(const capsule of Object.values(rigidBodies)) {
-  //     capsule.component.update(2, friction);
-  //     capsule.component.force = Vector2D.zero
-  //     for(const path of paths) {
-  //       if(path.key !== capsule.component.id) continue;
-  //       path.changeTrackingPoint(capsule.component.point)
-  //     }
-  //   }
-  // }
+//   const friction = .5
+//   for(const capsule of Object.values(rigidBodies)) {
+//     capsule.component.update(2, friction);
+//     capsule.component.force = Vector2D.zero
+//     for(const path of paths) {
+//       if(path.key !== capsule.component.id) continue;
+//       path.changeTrackingPoint(capsule.component.point)
+//     }
+//   }
+// }
 
 const updateSprings = (dampener: number) => {
-  for(const spring of repulsiveNodes) {
+  for (const spring of repulsiveNodes) {
     spring.update(dampener)
     updatePathPoint(spring.nodeA)
     updatePathPoint(spring.nodeB)
   }
 
-  for(const spring of nodeConnections) {
+  for (const spring of nodeConnections) {
     spring.update(dampener)
     updatePathPoint(spring.nodeA)
     updatePathPoint(spring.nodeB)
@@ -396,9 +396,9 @@ const updateSprings = (dampener: number) => {
 
 }
 
-function *detectAndSolveCollisions(capsule:BoxCapsule<RigidNode>){ 
-  for(const other of Object.values(rigidBodies)) {
-    if(capsule === other || !capsule.isColliding(other)) continue;
+function* detectAndSolveCollisions(capsule: BoxCapsule<RigidNode>) {
+  for (const other of Object.values(rigidBodies)) {
+    if (capsule === other || !capsule.isColliding(other)) continue;
     const collisionAxis = capsule.component.point.subtract(other.component.point);
     const distance = collisionAxis.magnitude();
     const normilizedVector = collisionAxis.normalize()
@@ -409,7 +409,7 @@ function *detectAndSolveCollisions(capsule:BoxCapsule<RigidNode>){
     let delta = (aDistanceFromCenter - distance) * capsule.component.restitution;
     let velocity = normilizedVector.scale(delta * .5);
     capsule.component.setPoint(capsule.component.point.add(velocity));
-    
+
     delta = (bDistanceFromCenter - distance) * other.component.restitution
     velocity = normilizedVector.scale(delta * .5);
     other.component.setPoint(other.component.point.subtract(velocity));
@@ -418,26 +418,26 @@ function *detectAndSolveCollisions(capsule:BoxCapsule<RigidNode>){
 }
 
 const detectAndHandleCollitions = () => {
-  for(const capsule of Object.values(rigidBodies)) {
-    for(const other of Object.values(rigidBodies)) {
-      if(capsule === other || !capsule.isColliding(other)) continue;
+  for (const capsule of Object.values(rigidBodies)) {
+    for (const other of Object.values(rigidBodies)) {
+      if (capsule === other || !capsule.isColliding(other)) continue;
       const collisionAxis = capsule.component.point.subtract(other.component.point);
       const distance = collisionAxis.magnitude();
-      
+
       const normilizedVector = collisionAxis.normalize()
       const capsuleRadius = Math.hypot(capsule.width, capsule.height);
       const otherRadius = Math.hypot(other.width, other.height)
       let delta = (capsuleRadius - distance) * capsule.component.restitution;
       let velocity = normilizedVector.scale(delta * .5);
 
-     // if(!capsule.component.isKinematic) {
-        capsule.component.setPoint(capsule.component.point.add(velocity));
-     // }
+      // if(!capsule.component.isKinematic) {
+      capsule.component.setPoint(capsule.component.point.add(velocity));
+      // }
 
       //if(!other.component.isKinematic) {
-        delta = (otherRadius - distance) * other.component.restitution
-        velocity = normilizedVector.scale(delta * .5);
-        other.component.setPoint(other.component.point.subtract(velocity));
+      delta = (otherRadius - distance) * other.component.restitution
+      velocity = normilizedVector.scale(delta * .5);
+      other.component.setPoint(other.component.point.subtract(velocity));
       //}
     }
   }
@@ -450,7 +450,7 @@ const detectAndHandleCollitions = () => {
 //   // Calculate the overlap on each axis
 //   let xOverlap = (otherPoint.x + other.width - point.x);
 //   let yOverlap = (otherPoint.y + other.height - point.y);
-  
+
 //   if(Math.abs(xOverlap) < Math.abs(yOverlap)) {
 //       // Contact on left or right side of rectangles
 //       return new Vector2D(point.x + xOverlap/2, otherPoint.y);
@@ -472,7 +472,7 @@ const detectAndHandleCollitions = () => {
 
 const getEnergy = () => {
   let energy = 0;
-  for(const rg of Object.values(rigidBodies)) {
+  for (const rg of Object.values(rigidBodies)) {
     energy += rg.component.getKineticEnergy()
   }
   return energy;
@@ -480,30 +480,30 @@ const getEnergy = () => {
 const cool = (t: number) => t * .99
 
 const animateGraph = (timestamp: number) => {
-  if(!lastFrameTime) {
+  if (!lastFrameTime) {
     lastFrameTime = timestamp
   }
   const diff = timestamp - lastFrameTime
-  if(diff >= 16.67) {
+  if (diff >= 16.67) {
     lastFrameTime = timestamp
     // startForce()
     // updateBodies()
     updateSprings(temp)
     const energy = getEnergy()
-    
-    if(energy < 1)
+
+    if (energy < 1)
       detectAndHandleCollitions()
     //containBodies()
     clearReadrawAll()
 
-    if(Math.abs(energy-lastEnergy) <= 0.001) {
+    if (Math.abs(energy - lastEnergy) <= 0.001) {
       console.log('Stopping')
       return;
     }
     lastEnergy = energy
     temp = cool(temp)
   }
-  if(stop) return;
+  if (stop) return;
   requestAnimationFrame(animateGraph)
 }
 
@@ -520,37 +520,37 @@ export const ActionContainer = () => {
 
   return (
     <>
-    <div 
-    style={{ width: '100%' }} 
-    onClick={handleClick}
-    onPointerDown={handleDrag}
-    onPointerMove={onDrag}
-    onPointerUp={onPointerUp}
-    >
-      <ZoomComponent />
-      <button onClick={recenter}>Recenter</button>
-      <button onClick={recenterOnShape}>Recenter Shape</button>
-      <button onClick={recenterOnContent}>Recenter around content</button>
-      <button onClick={scaleToFit}>Recenter around content and scale</button>
-      <button onClick={startAnimation}>Start Anim</button>
-      <button onClick={(e) => { 
+      <div
+        style={{ width: '100%' }}
+        onClick={handleClick}
+        onPointerDown={handleDrag}
+        onPointerMove={onDrag}
+        onPointerUp={onPointerUp}
+      >
+        <ZoomComponent />
+        <button onClick={recenter}>Recenter</button>
+        <button onClick={recenterOnShape}>Recenter Shape</button>
+        <button onClick={recenterOnContent}>Recenter around content</button>
+        <button onClick={scaleToFit}>Recenter around content and scale</button>
+        <button onClick={startAnimation}>Start Anim</button>
+        <button onClick={(e) => {
           e.preventDefault()
           e.stopPropagation()
-        stop = true
+          stop = true
         }}>Stop Anim</button>
-    </div>
-    <CanvasFab fabId='one-and-only' offsetTop={50} orientation='horizontal' placement='bottom'>
-      <ButtonGroup>
-        <Button onClick={() => console.log('Option 1')}>Option 1</Button>
-        <Button>Option 2</Button>
-      </ButtonGroup>
-    </CanvasFab>
-    <CanvasFab fabId='vertical' offsetTop={50} orientation='vertical' placement='right'>
-      <ButtonGroup orientation='vertical'>
-        <Button onClick={() => console.log('Option 1')}>Option 1</Button>
-        <Button>Option 2</Button>
-      </ButtonGroup>
-    </CanvasFab>
+      </div>
+      <CanvasFab fabId='one-and-only' offsetTop={50} orientation='horizontal' placement='bottom'>
+        <ButtonGroup>
+          <Button onClick={() => console.log('Option 1')}>Option 1</Button>
+          <Button>Option 2</Button>
+        </ButtonGroup>
+      </CanvasFab>
+      <CanvasFab fabId='vertical' offsetTop={50} orientation='vertical' placement='right'>
+        <ButtonGroup orientation='vertical'>
+          <Button onClick={() => console.log('Option 1')}>Option 1</Button>
+          <Button>Option 2</Button>
+        </ButtonGroup>
+      </CanvasFab>
     </>
   )
 }
