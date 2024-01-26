@@ -23,6 +23,19 @@ export const getCanvas2DContext = (inCanvas?: HTMLCanvasElement | null): CanvasR
   return canvas.getContext('2d');
 }
 
+const updateBackgroundTransform = (scale: number, matrix: DOMMatrix) => {
+  const canvasBackgroundDiv = document.getElementById('canvas-kit-canvas-section');
+  if (!canvasBackgroundDiv) return;
+
+  // Extract the effective offsetX and offsetY from the matrix
+  const adjustedTranslateX = matrix.e / window.devicePixelRatio;
+  const adjustedTranslateY = matrix.f / window.devicePixelRatio;
+
+  canvasBackgroundDiv.style.backgroundPosition = `${adjustedTranslateX}px ${adjustedTranslateY}px`;
+  canvasBackgroundDiv.style.backgroundSize = `${scale * 20}px ${scale * 20}px`
+}
+
+
 const setCanvasTransform = (ctx: CanvasRenderingContext2D) => {
   ctx.setTransform(
     canvasTransform.scale * window.devicePixelRatio,
@@ -32,6 +45,8 @@ const setCanvasTransform = (ctx: CanvasRenderingContext2D) => {
     canvasTransform.offset.x,
     canvasTransform.offset.y
   )
+
+  updateBackgroundTransform(canvasTransform.scale, ctx.getTransform());
 }
 
 const initCanvas = (width: number, height: number) => {
@@ -76,7 +91,7 @@ export const Canvas = ({ fullScreen, offsetTop }: CanvasProps) => {
   useLayoutEffect(() => {
     if (fullScreen) {
       // Special fix for a special browser (IE would be proud)
-      if(isSafari()) {
+      if (isSafari()) {
         handleResize()
         window.addEventListener('resize', handleResize)
       }
@@ -86,7 +101,7 @@ export const Canvas = ({ fullScreen, offsetTop }: CanvasProps) => {
     }
     return () => {
       if (fullScreen) {
-        if(isSafari()) {
+        if (isSafari()) {
           window.removeEventListener('resize', handleResize)
         }
         else {

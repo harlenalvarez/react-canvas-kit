@@ -42,30 +42,30 @@ export const CanvasContainer = ({ offsetTop, children, includeScrollBars }: Canv
   const nestedComponents = fullScreen ? getFullScreenStyle({ offsetTop }) : {};
 
   useLayoutEffect(() => {
-    if(!containerRef.current) return;
+    if (!containerRef.current) return;
     const doc = document.getElementsByClassName(CanvasContainerCss.container);
-    if(doc.length) {
-      const {top} = doc[0].getBoundingClientRect();
-      if(offsetTop && top !== offsetTop) {
+    if (doc.length) {
+      const { top } = doc[0].getBoundingClientRect();
+      if (offsetTop && top !== offsetTop) {
         const topDiff = top - offsetTop;
-        containerRef.current.style.top = `${offsetTop-topDiff}px`;
+        containerRef.current.style.top = `${offsetTop - topDiff}px`;
       }
     }
   }, [containerRef, layout, offsetTop]);
 
   return (
     <>
-    <div style={layout} className={CanvasContainerCss.container} ref={containerRef}>
-      <section id='canvas-kit-action-section' style={nestedComponents} className={styles.main} tabIndex={1}>
-        {children}
-      </section>
-      <section id='canvas-kit-popover-section' style={nestedComponents} className={styles.popover} tabIndex={0} />
-      <section id='cavnas-kit-canvas-section' style={nestedComponents} className={styles.canvas} tabIndex={0}>
-        <Canvas fullScreen={fullScreen} offsetTop={offsetTop} />
-        { includeScrollBars && <Scrollbars />}
-      </section>
-    </div>
-    <div className={styles.modalContainer} id='rck-canvas-portal-container' />
+      <div id='canvas-kit-main-container' style={layout} className={CanvasContainerCss.container} ref={containerRef}>
+        <section id='canvas-kit-action-section' style={nestedComponents} className={styles.main} tabIndex={1}>
+          {children}
+        </section>
+        <section id='canvas-kit-popover-section' style={nestedComponents} className={styles.popover} tabIndex={0} />
+        <section id='canvas-kit-canvas-section' style={nestedComponents} className={styles.canvas} tabIndex={0}>
+          <Canvas fullScreen={fullScreen} offsetTop={offsetTop} />
+          {includeScrollBars && <Scrollbars />}
+        </section>
+      </div>
+      <div className={styles.modalContainer} id='rck-canvas-portal-container' />
     </>
   );
 };

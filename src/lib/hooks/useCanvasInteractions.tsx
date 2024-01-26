@@ -43,7 +43,6 @@ export const useCanvasInteractions = ({ parentRef, enabled }: CanvasInteractions
   }, [parentRef, enabled])
 }
 
-
 const onScroll = (ev: WheelEvent) => {
   const ctx = getCanvas2DContext();
   if (!ctx) return;
