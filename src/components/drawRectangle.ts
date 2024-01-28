@@ -46,6 +46,15 @@ export class Rect2D extends CanvasPath2D {
 
   draw(ctx: CanvasRenderingContext2D) {
     ctx.save()
+    ctx.beginPath()
+    ctx.strokeStyle = '#646cff';
+    ctx.fillStyle = 'white'
+    ctx.lineWidth = 2;
+    ctx.lineCap = 'round';
+    ctx.stroke(this.path)
+    ctx.fill(this.path)
+
+    ctx.beginPath()
     ctx.moveTo(this.point.x + 5, this.point.y + 5);
     ctx.font = this.font
     ctx.textAlign = 'left';
@@ -53,16 +62,12 @@ export class Rect2D extends CanvasPath2D {
     ctx.fillStyle = 'black';
     ctx.fillText('Hello', this.point.x + 5, this.point.y + 5);
 
+    ctx.beginPath()
     ctx.moveTo(this.trackingPoint.x, this.trackingPoint.y)
     ctx.strokeStyle = '#646cff';
     ctx.lineWidth = 2;
     ctx.lineCap = 'round';
     ctx.fill(this.icon)
-
-    ctx.strokeStyle = '#646cff';
-    ctx.lineWidth = 2;
-    ctx.lineCap = 'round';
-    ctx.stroke(this.path)
     ctx.restore()
   }
 

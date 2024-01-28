@@ -2,6 +2,7 @@ import { Canvas } from '@/canvas';
 import { useCanvasInteractions } from '@/hooks/useCanvasInteractions';
 import { useLayoutEffect, useMemo, useRef } from 'react';
 import styles from './Container.module.css';
+import { CanvasContainerCss } from './Container.types';
 import { Scrollbars } from './Scrollbars';
 
 const LayoutStyle: React.CSSProperties = {
@@ -25,10 +26,6 @@ const getFullScreenStyle = ({ offsetTop }: Omit<CanvasContainerProps, 'children'
   return { top, minWidth: '100%', minHeight } as React.CSSProperties
 }
 
-export const CanvasContainerCss = {
-  container: 'RCK-Container-Layout'
-}
-
 export const CanvasContainer = ({ offsetTop, children, includeScrollBars }: CanvasContainerProps) => {
   // V1 will only support fullscreen
   const fullScreen = true
@@ -36,7 +33,7 @@ export const CanvasContainer = ({ offsetTop, children, includeScrollBars }: Canv
   useCanvasInteractions({
     enabled: fullScreen ?? false,
     parentRef: containerRef
-  }, [containerRef]);
+  });
 
   const layout = useMemo(() => fullScreen ? { ...LayoutStyle, ...getFullScreenStyle({ offsetTop }) } : LayoutStyle, [fullScreen, offsetTop]);
   const nestedComponents = fullScreen ? getFullScreenStyle({ offsetTop }) : {};

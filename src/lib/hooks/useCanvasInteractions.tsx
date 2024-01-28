@@ -1,6 +1,6 @@
 import { clamp } from '@practicaljs/canvas-kit';
 import { useEffect } from 'react';
-import { canvasTransform, getCanvas2DContext, keyboardEventContext, requestRedraw } from '..';
+import { canvasTransform, getCanvas2DContext, keyboardEventContext, requestRedrawAllLayers } from '..';
 export type CanvasInteractionsProps = {
   parentRef: React.RefObject<HTMLDivElement>,
   enabled: boolean
@@ -21,7 +21,7 @@ const interactionsState = new InteractionsState();
 /**
  * Method to control pan, zoom and scroll
  */
-export const useCanvasInteractions = ({ parentRef, enabled }: CanvasInteractionsProps, _: React.DependencyList) => {
+export const useCanvasInteractions = ({ parentRef, enabled }: CanvasInteractionsProps) => {
   useEffect(() => {
     const parent = parentRef?.current
     if (!parent || !enabled) return;
@@ -54,7 +54,7 @@ const onScroll = (ev: WheelEvent) => {
   }
   else {
     canvasTransform.changeOffset(ev.deltaX, ev.deltaY);
-    requestRedraw();
+    requestRedrawAllLayers();
   }
 }
 
@@ -85,7 +85,7 @@ const onCanvasDrag = (ev: MouseEvent) => {
   const deltaX = ev.movementX * devicePixelRatio;
   const deltaY = ev.movementY * devicePixelRatio;
   canvasTransform.changeOffset(-deltaX, -deltaY);
-  requestRedraw();
+  requestRedrawAllLayers();
 }
 
 const stopMouseDrag = () => {
@@ -135,9 +135,9 @@ const preventOnPanning = (ev: MouseEvent) => {
  * Changes 
  * @param value 
  */
-export const changeScale = (value: number, x?: number, y?: number) => {
+const changeScale = (value: number, x?: number, y?: number) => {
   const ctx = getCanvas2DContext();
   if (!ctx) return;
   canvasTransform.changeScale(value, ctx, x, y);
-  requestRedraw();
+  requestRedrawAllLayers();
 }

@@ -1,4 +1,4 @@
-import { canvasTransform, getCanvas2DContext, requestRedraw, useTransformSelect } from '@/index';
+import { canvasTransform, getCanvas2DContext, requestRedrawAllLayers, useTransformSelect } from '@/index';
 
 const handleZoomOut = (e: React.MouseEvent) => {
   e.preventDefault();
@@ -6,7 +6,7 @@ const handleZoomOut = (e: React.MouseEvent) => {
   const ctx = getCanvas2DContext();
   if (!ctx) return;
   canvasTransform.changeScale(-0.1, ctx)
-  requestRedraw()
+  requestRedrawAllLayers()
 }
 
 const handleZoomIn = (e: React.MouseEvent) => {
@@ -15,7 +15,7 @@ const handleZoomIn = (e: React.MouseEvent) => {
   const ctx = getCanvas2DContext();
   if (!ctx) return;
   canvasTransform.changeScale(0.1, ctx)
-  requestRedraw()
+  requestRedrawAllLayers()
 }
 
 const resetZoom = (e: React.MouseEvent) => {
@@ -25,7 +25,7 @@ const resetZoom = (e: React.MouseEvent) => {
   if (!ctx) return;
   const change = 1 - canvasTransform.scale
   canvasTransform.changeScale(change, ctx)
-  requestRedraw()
+  requestRedrawAllLayers()
 }
 
 

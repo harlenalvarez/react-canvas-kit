@@ -1,12 +1,13 @@
 import { CanvasContainerProps } from '@/container';
-import { requestRedraw } from '@/hooks';
+import { requestRedrawAllLayers } from '@/hooks';
+import { canvasLayer, getCanvasElement } from '@/internal';
+import { getCanvas2DContext } from '@/utils';
 import { useEffect, useLayoutEffect } from 'react';
+import styles from './Canvas.module.css';
 import { canvasTransform } from './CanvasTransform';
 
 type CanvasProps = object & Omit<CanvasContainerProps, 'children'>
 
-const canvasId = 'pj-react-canvas-kit-canvas-element';
-const getCanvasElement = () => document.getElementById(canvasId) as HTMLCanvasElement | null
 
 const resizeObserver = new ResizeObserver((entries) => {
   const body = entries[0];
@@ -15,12 +16,6 @@ const resizeObserver = new ResizeObserver((entries) => {
 
 const handleResize = () => {
   initCanvas(window.innerWidth, window.innerHeight)
-}
-
-export const getCanvas2DContext = (inCanvas?: HTMLCanvasElement | null): CanvasRenderingContext2D | null => {
-  const canvas = inCanvas ?? getCanvasElement();
-  if (!canvas) return null;
-  return canvas.getContext('2d');
 }
 
 const updateBackgroundTransform = (scale: number, matrix: DOMMatrix) => {
@@ -45,32 +40,46 @@ const setCanvasTransform = (ctx: CanvasRenderingContext2D) => {
     canvasTransform.offset.x,
     canvasTransform.offset.y
   )
-
-  updateBackgroundTransform(canvasTransform.scale, ctx.getTransform());
 }
 
 const initCanvas = (width: number, height: number) => {
-  const canvasElement = getCanvasElement();
-  if (!canvasElement) return;
-  const ctx = getCanvas2DContext(canvasElement);
-  if (!ctx) return;
-  canvasElement.width = width * window.devicePixelRatio;
-  canvasElement.style.width = `${width}px`;
-  canvasElement.height = height * window.devicePixelRatio;
-  canvasElement.style.height = `${height}px`;
-  setCanvasTransform(ctx)
-  requestRedraw();
+  let ctx: CanvasRenderingContext2D | null = null;
+  for (const layerId of Object.values(canvasLayer)) {
+    const canvasElement = getCanvasElement(layerId);
+    if (!canvasElement) continue;
+    ctx = getCanvas2DContext(undefined, canvasElement);
+    if (!ctx) continue;
+    canvasElement.width = width * window.devicePixelRatio;
+    canvasElement.style.width = `${width}px`;
+    canvasElement.height = height * window.devicePixelRatio;
+    canvasElement.style.height = `${height}px`;
+    setCanvasTransform(ctx);
+  }
+  if (ctx) {
+    updateBackgroundTransform(canvasTransform.scale, ctx.getTransform());
+  }
+  requestRedrawAllLayers();
 }
 
 const onFullScreenCanvasLoad = (offset: number) => {
   const height = window.innerHeight - offset;
-  initCanvas(window.innerWidth, height)
+  initCanvas(window.innerWidth, height);
 }
 
 const setTransformOnChange = () => {
+  const internalCtx = getCanvas2DContext('internal');
+  if (internalCtx) {
+    setCanvasTransform(internalCtx);
+  }
+  const topCtx = getCanvas2DContext('top');
+  if (topCtx) {
+    setCanvasTransform(topCtx);
+  }
   const ctx = getCanvas2DContext();
-  if (!ctx) return;
-  setCanvasTransform(ctx);
+  if (ctx) {
+    setCanvasTransform(ctx);
+    updateBackgroundTransform(canvasTransform.scale, ctx.getTransform());
+  }
 }
 
 const isSafari = () => /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
@@ -113,7 +122,9 @@ export const Canvas = ({ fullScreen, offsetTop }: CanvasProps) => {
 
   return (
     <>
-      <canvas id={canvasId}>HTML Canvas is not supported in this browser, to view this content refer to the list of supported browsers <a href='https://developer.mozilla.org/en-US/docs/Web/API/Canvas_API#browser_compatibility'>Browser Compatinility</a></canvas>
+      <canvas id={canvasLayer.main} className={styles.canvasChild}>HTML Canvas is not supported in this browser, to view this content refer to the list of supported browsers <a href='https://developer.mozilla.org/en-US/docs/Web/API/Canvas_API#browser_compatibility'>Browser Compatinility</a></canvas>
+      <canvas id={canvasLayer.top} className={styles.canvasChild}>HTML Canvas is not supported in this browser, to view this content refer to the list of supported browsers <a href='https://developer.mozilla.org/en-US/docs/Web/API/Canvas_API#browser_compatibility'>Browser Compatinility</a></canvas>
+      <canvas id={canvasLayer.internal} className={styles.canvasChild}>HTML Canvas is not supported in this browser, to view this content refer to the list of supported browsers <a href='https://developer.mozilla.org/en-US/docs/Web/API/Canvas_API#browser_compatibility'>Browser Compatinility</a></canvas>
     </>
   );
 };

@@ -1,23 +1,14 @@
-import { canvasTransform, getCanvas2DContext } from '@/canvas';
-import { CanvasFab } from '@/container';
-import { getFabContext } from '@/container/canvas-fab/CanvasFabContext';
-import { requestRedraw, useRedrawEvent } from '@/hooks';
-import { clearAll } from '@/utils';
 import { Button, ButtonGroup } from '@mui/material';
-import { BoxCapsule, RigidNode, Spring, Vector2D, getCanvasCenter, getCanvasPoint, getLineRotation, lineRectInterceptionPoint, linearInterpolation, rotateRect } from '@practicaljs/canvas-kit';
+import { BoxCapsule, RigidNode, Spring, Vector2D, getCanvasPoint, getLineRotation, lineRectInterceptionPoint, linearInterpolation, rotateRect } from '@practicaljs/canvas-kit';
 import { useEffect } from 'react';
+import { CanvasFab, canvasTransform, clearAll, getCanvas2DContext, getFabContext, requestRedraw, useRedrawEvent } from '../lib';
 import { ZoomComponent } from './ZoomComponent';
 import { Rect2D, clearPaths, drawRectangle, nodeConnections, paths } from './drawRectangle';
-
-
-
-
 
 /**
  * The spring ties together 2 rigid nodes, spring forces will be automatically applied to keep the object at the given distance.
  * If the spring is repulsive, it will make sure that the 2 rigid nodes are not within the given distance but not prevent streching past that
  */
-
 const K = .98
 const TENSION = 150
 let previousPath: Rect2D | null = null;
@@ -211,19 +202,13 @@ const clearReadrawAll = () => {
 const redrawAll = (ctx?: CanvasRenderingContext2D | null | number) => {
   ctx = typeof ctx === 'number' || !ctx ? getCanvas2DContext() : ctx;
   if (!ctx) return;
-
-  const [x, y] = getCanvasCenter(ctx)
-  //centerPoint = { x: x-300,y: y-300}
-  ctx.rect(x - 300, y - 300, 600, 600)
-  ctx.stroke()
-  ctx.beginPath();
-
   ctx.save()
+  ctx.beginPath();
   ctx.strokeStyle = 'black'
   for (const spring of Object.values(nodeConnections)) {
     drawLineInterseptingLine(ctx, rigidBodies[spring.nodeA.id], rigidBodies[spring.nodeB.id])
   }
-  ctx.restore()
+  ctx.restore();
   for (const path of paths) {
     drawRectangle(0, 0, ctx, path)
   }

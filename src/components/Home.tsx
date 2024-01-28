@@ -10,7 +10,7 @@ const Container = () => {
   })
   return (
     <div style={{ background: 'white' }}>
-      <CanvasContainer offsetTop={50} includeScrollBars={true}>
+      <CanvasContainer offsetTop={40} includeScrollBars={true}>
         <ActionContainer />
       </CanvasContainer >
     </div>
