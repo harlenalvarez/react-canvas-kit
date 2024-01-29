@@ -43,14 +43,14 @@
     "test:w": "vitest"
   },
   "dependencies": {
-    "@practicaljs/canvas-kit": ">=1.0.0",
+    "@practicaljs/canvas-kit": ">=1.1.0",
     "@practicaljs/priority-queue": ">=1.1.3",
     "react": ">=18.0.0",
     "react-dom": ">=18.0.0",
     "vite-plugin-css-injected-by-js": "^3.3.0"
   },
   "peerDependencies": {
-    "@practicaljs/canvas-kit": ">=1.0.0",
+    "@practicaljs/canvas-kit": ">=1.1.0",
     "@practicaljs/priority-queue": ">=1.1.3",
     "react": ">=18.0.0",
     "react-dom": ">=18.0.0"
