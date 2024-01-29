@@ -1,6 +1,6 @@
 {
   "name": "@practicaljs/react-canvas-kit",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "license": "MIT",
   "type": "module",
   "author": {
@@ -62,15 +62,15 @@
     "@types/react-dom": "^18.2.7",
     "@typescript-eslint/eslint-plugin": "^6.0.0",
     "@typescript-eslint/parser": "^6.0.0",
-    "@vitejs/plugin-react": "^4.0.3",
+    "@vitejs/plugin-react": "^4.2.1",
     "eslint": "^8.45.0",
     "eslint-plugin-react-hooks": "^4.6.0",
     "eslint-plugin-react-refresh": "^0.4.3",
-    "jsdom": "22.1.0",
+    "jsdom": "24.0.0",
     "json": "11.0.0",
     "typescript": "^5.0.2",
-    "vite": "^4.4.5",
-    "vite-plugin-dts": "3.6.3",
-    "vitest": "0.34.6"
+    "vite": "5.0.12",
+    "vite-plugin-dts": "3.7.2",
+    "vitest": "1.2.2"
   }
 }
