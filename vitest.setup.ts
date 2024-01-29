@@ -5,7 +5,7 @@ Object.defineProperty(global, 'crypto', {
   value: {
     randomUUID: cryto.randomUUID
   }
-})
+});
 
 beforeAll(() => {
   vi.stubGlobal('Path2D', vi.fn(() => ({

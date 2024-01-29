@@ -69,7 +69,7 @@ const onMouseUp = (ev: MouseEvent) => {
   if (ev.button === 1 || (ev.button === 0 && keyboardEventContext.Space)) {
     ev.preventDefault();
     ev.stopPropagation();
-    stopMouseDrag()
+    stopMouseDrag(ev)
   }
 }
 
@@ -88,12 +88,14 @@ const onCanvasDrag = (ev: MouseEvent) => {
   requestRedrawAllLayers();
 }
 
-const stopMouseDrag = () => {
+const stopMouseDrag = (ev: MouseEvent) => {
   document.body.style.cursor = 'default';
   document.removeEventListener('mousemove', onCanvasDrag);
   document.removeEventListener('mouseup', onMouseUp);
   interactionsState.panning = false;
-  interactionsState.preventOnClick = true;
+  if (ev.button === 0 && keyboardEventContext.Space) {
+    interactionsState.preventOnClick = true;
+  }
 }
 
 const scrollOrPinchScale = (ev: WheelEvent) => {
