@@ -69,7 +69,7 @@ const onMouseUp = (ev: MouseEvent) => {
   if (ev.button === 1 || (ev.button === 0 && keyboardEventContext.Space)) {
     ev.preventDefault();
     ev.stopPropagation();
-    stopMouseDrag(ev)
+    stopMouseDrag(ev.button)
   }
 }
 
@@ -88,12 +88,12 @@ const onCanvasDrag = (ev: MouseEvent) => {
   requestRedrawAllLayers();
 }
 
-const stopMouseDrag = (ev: MouseEvent) => {
+const stopMouseDrag = (button: number) => {
   document.body.style.cursor = 'default';
   document.removeEventListener('mousemove', onCanvasDrag);
   document.removeEventListener('mouseup', onMouseUp);
   interactionsState.panning = false;
-  if (ev.button === 0 && keyboardEventContext.Space) {
+  if (button === 0 && keyboardEventContext.Space) {
     interactionsState.preventOnClick = true;
   }
 }
@@ -120,7 +120,7 @@ const onKeyboard = (ev: KeyboardEvent) => {
 
 const onKeyboardUp = (ev: KeyboardEvent) => {
   if (keyboardEventContext.Space && interactionsState.panning) {
-    stopMouseDrag();
+    stopMouseDrag(0);
   }
   keyboardEventContext.removeKey(ev);
 }
