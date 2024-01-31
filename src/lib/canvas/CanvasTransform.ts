@@ -1,10 +1,13 @@
 import { Point, clamp, getCanvasPointFromMatrix, getMidPoint } from '@practicaljs/canvas-kit';
 import { PriorityQueue } from '@practicaljs/priority-queue';
-
+export type CanvasTransformSnapshot = {
+  scale: number,
+  offset: Point
+}
 const listeners = new Set<() => void>();
 const syncListeners = new Set<() => void>();
 const trackingListeners = new Set<() => void>();
-let transformObject = {
+let transformObject: CanvasTransformSnapshot = {
   scale: 1,
   offset: { x: 0, y: 0 }
 }
@@ -67,6 +70,13 @@ export class CanvasTransform {
 
   set offset(value: Point) {
     this._offset = { ...value };
+  }
+
+  loadFromSnapshot(snapshot: CanvasTransformSnapshot) {
+    this.scale = snapshot.scale;
+    this.offset = { ...snapshot.offset }
+    this.syncNotify()
+    this.notify()
   }
 
   changeOffset(deltaX: number, deltaY: number) {
@@ -203,7 +213,7 @@ export class CanvasTransform {
     }
   }
 
-  getSnapshot = () => {
+  getSnapshot = (): CanvasTransformSnapshot => {
     if (
       transformObject.scale !== this._scale ||
       transformObject.offset.x !== this.offset.x ||
@@ -318,6 +328,7 @@ export class CanvasTransform {
     return Math.min(1, actualScale)
   }
 }
+
 export type CanvasTransformManager = CanvasTransform;
 /**
  * This canvas can be used with React useExternalStoreSync
