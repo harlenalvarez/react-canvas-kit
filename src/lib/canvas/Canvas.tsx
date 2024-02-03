@@ -27,7 +27,8 @@ const updateBackgroundTransform = (scale: number, matrix: DOMMatrix) => {
   const adjustedTranslateY = matrix.f / window.devicePixelRatio;
 
   canvasBackgroundDiv.style.backgroundPosition = `${adjustedTranslateX}px ${adjustedTranslateY}px`;
-  canvasBackgroundDiv.style.backgroundSize = `${scale * 20}px ${scale * 20}px`
+  const bgSize = 30
+  canvasBackgroundDiv.style.backgroundSize = `${scale * bgSize}px ${scale * bgSize}px`
 }
 
 

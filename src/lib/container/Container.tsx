@@ -18,6 +18,7 @@ export type CanvasContainerProps = {
   offsetTop?: number,
   fullScreen?: boolean,
   includeScrollBars?: boolean,
+  mode?: 'light' | 'dark'
 }
 
 const getFullScreenStyle = ({ offsetTop }: Omit<CanvasContainerProps, 'children'>) => {
@@ -26,7 +27,7 @@ const getFullScreenStyle = ({ offsetTop }: Omit<CanvasContainerProps, 'children'
   return { top, minWidth: '100%', minHeight } as React.CSSProperties
 }
 
-export const CanvasContainer = ({ offsetTop, children, includeScrollBars }: CanvasContainerProps) => {
+export const CanvasContainer = ({ offsetTop, children, includeScrollBars, mode }: CanvasContainerProps) => {
   // V1 will only support fullscreen
   const fullScreen = true
   const containerRef = useRef<HTMLDivElement>(null)
@@ -50,6 +51,8 @@ export const CanvasContainer = ({ offsetTop, children, includeScrollBars }: Canv
     }
   }, [containerRef, layout, offsetTop]);
 
+  const canvasClass = mode === 'dark' ? `${styles.canvas} ${styles.dark}` : styles.canvas;
+
   return (
     <>
       <div id='canvas-kit-main-container' style={layout} className={CanvasContainerCss.container} ref={containerRef}>
@@ -57,7 +60,7 @@ export const CanvasContainer = ({ offsetTop, children, includeScrollBars }: Canv
           {children}
         </section>
         <section id='canvas-kit-popover-section' style={nestedComponents} className={styles.popover} tabIndex={0} />
-        <section id='canvas-kit-canvas-section' style={nestedComponents} className={styles.canvas} tabIndex={0}>
+        <section id='canvas-kit-canvas-section' style={nestedComponents} className={canvasClass} tabIndex={0}>
           <Canvas fullScreen={fullScreen} offsetTop={offsetTop} />
           {includeScrollBars && <Scrollbars />}
         </section>

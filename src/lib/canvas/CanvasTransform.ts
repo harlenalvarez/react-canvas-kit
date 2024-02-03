@@ -45,8 +45,6 @@ export class CanvasTransform {
   readonly min = 0.1;
   readonly max = 4;
 
-  public foo: string = ''
-
   private minX = new PriorityQueue<ShapeCoordinate>((a, b) => a.value - b.value);
   private minY = new PriorityQueue<ShapeCoordinate>((a, b) => a.value - b.value);
   private maxX = new PriorityQueue<ShapeCoordinate>((a, b) => b.value - a.value);
@@ -72,6 +70,10 @@ export class CanvasTransform {
     this._offset = { ...value };
   }
 
+  /**
+   * Loads a previous snapshot, usefull when re-loading without loosing state
+   * @param snapshot a canvas transform snapshot, you can get it by calling getSnapshot()
+   */
   loadFromSnapshot(snapshot: CanvasTransformSnapshot) {
     this.scale = snapshot.scale;
     this.offset = { ...snapshot.offset }
@@ -79,6 +81,11 @@ export class CanvasTransform {
     this.notify()
   }
 
+  /**
+   * Changes the offset by the desired amount
+   * @param deltaX 
+   * @param deltaY 
+   */
   changeOffset(deltaX: number, deltaY: number) {
     const x = this.offset.x - deltaX;
     const y = this.offset.y - deltaY;
@@ -87,6 +94,14 @@ export class CanvasTransform {
     this.notify()
   }
 
+  /**
+   * Changes current scaled by the desired amount
+   * @param value 
+   * @param ctx 
+   * @param x 
+   * @param y 
+   * @returns 
+   */
   changeScale(value: number, ctx: CanvasRenderingContext2D, x?: number, y?: number) {
     const prevScale = this.scale;
     this.scale = roundToNearestTenThousandth(this.scale + value);

@@ -17,9 +17,13 @@
 .canvas {
   position: fixed;
   z-index: 0;
-  background-image: radial-gradient(circle at center, #b6b6b6 5%, transparent 0);
-  background-size: 20px 20px;
+  background-image: radial-gradient(circle at center, #e1e1e1 max(1px, 5%), transparent 0);
+  background-size: 30px 30px;
   background-position: -1% -1%;
+}
+
+.canvas.dark {
+  background-image: radial-gradient(circle at center, #2a2a2a max(1px, 5%), transparent 0);
 }
 
 .canvas:focus-visible {
