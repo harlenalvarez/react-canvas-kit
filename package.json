@@ -1,6 +1,6 @@
 {
   "name": "@practicaljs/react-canvas-kit",
-  "version": "1.3.0",
+  "version": "1.3.1",
   "license": "MIT",
   "type": "module",
   "author": {
@@ -44,14 +44,14 @@
   },
   "dependencies": {
     "@practicaljs/canvas-kit": ">=1.1.0",
-    "@practicaljs/priority-queue": ">=1.1.3",
+    "@practicaljs/priority-queue": ">=1.2.0",
     "react": ">=18.0.0",
     "react-dom": ">=18.0.0",
     "vite-plugin-css-injected-by-js": "^3.3.0"
   },
   "peerDependencies": {
     "@practicaljs/canvas-kit": ">=1.1.0",
-    "@practicaljs/priority-queue": ">=1.1.3",
+    "@practicaljs/priority-queue": ">=1.2.0",
     "react": ">=18.0.0",
     "react-dom": ">=18.0.0"
   },

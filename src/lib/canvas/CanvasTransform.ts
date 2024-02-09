@@ -45,10 +45,10 @@ export class CanvasTransform {
   readonly min = 0.1;
   readonly max = 4;
 
-  private minX = new PriorityQueue<ShapeCoordinate>((a, b) => a.value - b.value);
-  private minY = new PriorityQueue<ShapeCoordinate>((a, b) => a.value - b.value);
-  private maxX = new PriorityQueue<ShapeCoordinate>((a, b) => b.value - a.value);
-  private maxY = new PriorityQueue<ShapeCoordinate>((a, b) => b.value - a.value);
+  private minX = new PriorityQueue<ShapeCoordinate>((a, b) => a.value - b.value, a => a.id);
+  private minY = new PriorityQueue<ShapeCoordinate>((a, b) => a.value - b.value, a => a.id);
+  private maxX = new PriorityQueue<ShapeCoordinate>((a, b) => b.value - a.value, a => a.id);
+  private maxY = new PriorityQueue<ShapeCoordinate>((a, b) => b.value - a.value, a => a.id);
 
   get trackingEnabled(): boolean {
     return Boolean(this.minX.length && this.minY.length && this.maxX.length && this.maxY.length);
@@ -142,6 +142,19 @@ export class CanvasTransform {
 
     this.minY.enqueue({ id: key, value: y });
     this.maxY.enqueue({ id: key, value: y });
+    this.trackingNotify();
+  }
+
+  /**
+   * Removes the tracked shape
+   * @param key track shape key
+   */
+  removeTrackedShape(key: string) {
+    this.minX.dequeueByKey(key);
+    this.maxX.dequeueByKey(key);
+
+    this.minY.dequeueByKey(key);
+    this.maxY.dequeueByKey(key);
     this.trackingNotify();
   }
 
