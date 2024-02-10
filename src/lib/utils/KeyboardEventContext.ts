@@ -4,6 +4,7 @@ export const SpecialKeys = {
   Shift: 1 << 2,
   Space: 1 << 3,
   Tab: 1 << 4,
+  Meta: 1 << 5
 }
 
 class KeyboardEventContext {
@@ -13,6 +14,25 @@ class KeyboardEventContext {
     return Boolean(this.keys & SpecialKeys.Space);
   }
 
+  get Shift() {
+    return Boolean(this.keys & SpecialKeys.Shift);
+  }
+
+  get Alt() {
+    return Boolean(this.keys & SpecialKeys.Alt);
+  }
+
+  get Control() {
+    return Boolean(this.keys & SpecialKeys.Control);
+  }
+
+  get Tab() {
+    return Boolean(this.keys & SpecialKeys.Tab);
+  }
+
+  get Meta() {
+    return Boolean(this.keys & SpecialKeys.Meta);
+  }
   /**
    * 
    * @param kv on keydown add the key, only special keys will be registered
