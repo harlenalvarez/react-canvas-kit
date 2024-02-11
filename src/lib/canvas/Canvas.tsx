@@ -8,7 +8,6 @@ import { canvasTransform } from './CanvasTransform';
 
 type CanvasProps = object & Omit<CanvasContainerProps, 'children'>
 
-
 const resizeObserver = new ResizeObserver((entries) => {
   const body = entries[0];
   initCanvas(body.contentRect.width, body.contentRect.height);
@@ -30,7 +29,6 @@ const updateBackgroundTransform = (scale: number, matrix: DOMMatrix) => {
   const bgSize = 30
   canvasBackgroundDiv.style.backgroundSize = `${scale * bgSize}px ${scale * bgSize}px`
 }
-
 
 const setCanvasTransform = (ctx: CanvasRenderingContext2D) => {
   ctx.setTransform(

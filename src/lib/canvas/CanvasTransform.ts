@@ -146,6 +146,23 @@ export class CanvasTransform {
   }
 
   /**
+   * Track shape content is similar to trackShape except here you pass in the min x y and max x y for more accurate tracking
+   * @param key 
+   * @param x - min x coordinate
+   * @param y - min y coordinate
+   * @param x1 - max x coordinate
+   * @param y1 - max y coordinate
+   */
+  trackShapeContent(key: string, x: number, y: number, x1: number, y1: number) {
+    this.minX.enqueue({ id: key, value: x });
+    this.minY.enqueue({ id: key, value: y });
+
+    this.maxX.enqueue({ id: key, value: x1 });
+    this.maxY.enqueue({ id: key, value: y1 });
+    this.trackingNotify();
+  }
+
+  /**
    * Removes the tracked shape
    * @param key track shape key
    */

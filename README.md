@@ -1,3 +1,12 @@
+# Beta Docs Notice
+We're excited to announce that we are in the process of developing new documentation to cover the extensive features of this library and the Canvas-Kit APIs. This new documentation, currently in beta, aims to provide comprehensive guides, examples, and API references to enhance your development experience.
+
+If you're eager to explore these new resources and start integrating them into your projects, check out the [RCK Documentation](https://www.reactcanvaskit.com/).
+
+We value your feedback as we strive to improve and finalize our documentation. If you have any suggestions, encounter any issues, or have questions, please don't hesitate to reach out via [insert feedback channel here - could be an email, GitHub link, etc.].
+
+Thank you for your support and contributions to making our documentation better for everyone!
+
 # Canvas React Kit
 
 A comprehensive toolkit for handling common canvas functions in React. It
